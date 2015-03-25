@@ -9,4 +9,4 @@ Authored by [Basil Shubin](http://resume.github.io/?bashu)
 
 ### Requirements
 
-Your database have *django-cities* installed and configured, see the [django-cities documentation](https://github.com/coderholic/django-cities) for details and setup instructions.
+You must have *django-cities* installed and configured, see the [django-cities documentation](https://github.com/coderholic/django-cities) for details and setup instructions.
