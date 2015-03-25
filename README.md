@@ -3,7 +3,7 @@ django-airports
 
 ### Airport models and worldwide airport data for Django
 
-django-airports provides you with airport related model and data (from [OpenFlights](http://www.http://openflights.org/)) that can be used in your django projects.
+django-airports provides you with airport related model and data (from [OpenFlights](http://openflights.org/)) that can be used in your django projects.
 
 Authored by [Basil Shubin](http://resume.github.io/?bashu)
 
