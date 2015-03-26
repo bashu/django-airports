@@ -16,6 +16,8 @@ DATABASES = {
     }
 }
 
+STATIC_URL = '/static/'
+
 MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -32,7 +34,9 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.staticfiles',
     'django.contrib.contenttypes',
+    'django.contrib.gis',
 
     'cities',
 ] + PROJECT_APPS
