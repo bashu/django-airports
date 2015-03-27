@@ -16,14 +16,17 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Airport',
             fields=[
+                ('airport_id', models.PositiveIntegerField(serialize=False, primary_key=True)),
                 ('name', models.CharField(max_length=100, verbose_name='name')),
-                ('code', models.CharField(max_length=3, serialize=False, verbose_name='IATA code', primary_key=True, validators=[django.core.validators.MinLengthValidator(3)])),
-                ('location', django.contrib.gis.db.models.fields.PointField(srid=4326)),
+                ('iata', models.CharField(blank=True, max_length=3, verbose_name='IATA/FAA code', validators=[django.core.validators.MinLengthValidator(3)])),
+                ('icao', models.CharField(blank=True, max_length=4, verbose_name='ICAO code', validators=[django.core.validators.MinLengthValidator(4)])),
+                ('altitude', models.FloatField(default=0, verbose_name='altitude')),
+                ('location', django.contrib.gis.db.models.fields.PointField(srid=4326, verbose_name='location')),
                 ('city', models.ForeignKey(to='cities.City')),
                 ('country', models.ForeignKey(to='cities.Country')),
             ],
             options={
-                'ordering': ['code'],
+                'ordering': ['iata'],
             },
             bases=(models.Model,),
         ),

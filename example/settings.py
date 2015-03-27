@@ -11,8 +11,9 @@ SECRET_KEY = 'YOUR_SECRET_KEY'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.spatialite',
-        'NAME': os.path.join(PROJECT_ROOT, 'example.db'),
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'geodjango',
+        'USER': os.environ['USER'],
     }
 }
 
