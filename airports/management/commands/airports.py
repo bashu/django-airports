@@ -36,7 +36,7 @@ class Command(BaseCommand):
     help = """Imports airport data from CSV into DB, complementing it with country/city information"""
     option_list = BaseCommand.option_list + (
         make_option('--flush', action='store_true', default=False,
-            help="Flush airport data."
+            help="Flush airports data."
         ),
     )
 
