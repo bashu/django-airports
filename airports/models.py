@@ -7,11 +7,17 @@ from django.utils.translation import gettext_lazy as _
 
 class Airport(models.Model):
 
-    name = models.CharField(_("name"), max_length=100)
-    code = models.CharField(_("IATA code"), primary_key=True, max_length=3,
-                            validators=[MinLengthValidator(3)])
+    airport_id = models.PositiveIntegerField(primary_key=True)
 
-    location = models.PointField()
+    name = models.CharField(_("name"), max_length=100)
+
+    iata = models.CharField(_("IATA/FAA code"), blank=True, max_length=3,
+                            validators=[MinLengthValidator(3)])
+    icao = models.CharField(_("ICAO code"), blank=True, max_length=4,
+                            validators=[MinLengthValidator(4)])
+
+    altitude = models.FloatField(_("altitude"), default=0)
+    location = models.PointField(_("location"))
 
     country = models.ForeignKey('cities.Country')
     city = models.ForeignKey('cities.City')
@@ -19,7 +25,7 @@ class Airport(models.Model):
     objects = models.GeoManager()
 
     class Meta:
-        ordering = ['code']
+        ordering = ['airport_id']
 
     def __unicode__(self):
         return self.name

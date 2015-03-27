@@ -91,7 +91,7 @@ class DataImporter(object):
         self.saved_airports = set()
 
     def start(self, f, encoding='utf8'):
-        logger.info("Importing airport data")
+        logger.info("Importing airports data")
         columns = self.columns
 
         dialect = csv.Sniffer().sniff(f.read(1024))
@@ -110,11 +110,8 @@ class DataImporter(object):
                 if (encoding):
                     row = map(lambda c: c.decode(encoding), row)
 
-                iata = row[columns['iata']]
-                if not iata:
-                    continue  # skip airports without IATA code
-
-                if iata in self.saved_airports:
+                airport_id = row[columns['airport_id']]
+                if airport_id in self.saved_airports:
                     continue  # already saved
 
                 country = self.get_country(row[columns['country_name']], row)
@@ -129,14 +126,14 @@ class DataImporter(object):
                         row[columns['name']], row[columns['city_name']]))
                     continue  # unable to get related city
 
-                airport = self.get_airport(iata, row, city)
+                airport = self.get_airport(airport_id, row, city)
                 if not airport:
                     continue
 
                 logger.debug("Added airport: {0}".format(airport))
 
-                if iata not in self.saved_airports:
-                    self.saved_airports.add(iata)
+                if airport_id not in self.saved_airports:
+                    self.saved_airports.add(airport_id)
 
                 rows += 1
             except IndexError as e:
@@ -185,16 +182,24 @@ class DataImporter(object):
         cache[(iso, name)] = c
         return c
 
-    def get_airport(self, iata, row, city):
+    def get_airport(self, airport_id, row, city):
         cols = self.columns
 
         try:
-            return Airport.objects.get(code=iata)
+            return Airport.objects.get(airport_id=airport_id)
         except Airport.DoesNotExist:
             pass
 
         point = Point(float(row[cols['longitude']]), float(row[cols['latitude']]))
-        name = row[cols['name']] or city.name
+        name = row[cols['name']].strip() or city.name
+        iata, icao = row[cols['iata']].strip(), row[cols['icao']].strip()
+        if icao == r'\N': icao = ''
+        try:
+            altitude = round(int(row[cols['altitude']].strip()) * 0.3048, 2)
+        except:
+            altitude = 0.0
 
         return Airport.objects.create(
-            code=iata, name=name, location=point, country=city.country, city=city)
+            iata=iata, icao=icao, name=name, airport_id=airport_id,
+            altitude=altitude, location=point, country=city.country, city=city,
+        )

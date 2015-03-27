@@ -6,8 +6,8 @@ from .models import Airport
 
 
 class AirportAdmin(admin.ModelAdmin):
-    list_display = ("code", "name", "city", "country")
-    search_fields = ("name", "code")
+    list_display = ("airport_id", "name", "iata", "icao", "city", "country")
+    search_fields = ("name", "iata", "icao")
     list_filter = ("country", )
     raw_id_fields = ['city']
 
