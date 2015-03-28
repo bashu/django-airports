@@ -8,7 +8,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-airports',
-    version='0.1',
+    version='0.1.1',
     packages=['airports'],
     include_package_data=True,
     license='MIT License',
@@ -17,6 +17,10 @@ setup(
     url='http://github.com/bashu/django-airports',
     author='Basil Shubin',
     author_email='basil.shubin@gmail.com',
+    install_requires=[
+        'requests',
+        'django-cities',
+    ],    
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
