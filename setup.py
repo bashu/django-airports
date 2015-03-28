@@ -17,6 +17,10 @@ setup(
     url='http://github.com/bashu/django-airports',
     author='Basil Shubin',
     author_email='basil.shubin@gmail.com',
+    install_requires=[
+        'requests',
+        'django-cities',
+    ],    
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
