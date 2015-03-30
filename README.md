@@ -23,7 +23,7 @@ You must have *django-cities* installed and configured, see the [django-cities d
 
 Either clone this repository into your project, or install with ```pip install django-airports```
 
-You'll need to add ```airports``` to ```INSTALLED_APPS``` in your projects settings.py file:
+You'll need to add ```airports``` to ```INSTALLED_APPS``` in your projects ```settings.py``` file:
 
 ```python
 INSTALLED_APPS = (
@@ -33,6 +33,11 @@ INSTALLED_APPS = (
 ```
 
 Then run ```./manage.py syncdb``` to create the required database tables, and ```./manage.py airports``` to import all of the airports data. **NOTE:** This can take some time.
+
+
+### Example
+
+Please see `example` application. This application is used to manually test the functionalities of this package. This also serves as a good example.
 
 ### Notes
 
