@@ -34,10 +34,9 @@ INSTALLED_APPS = (
 
 Then run ```./manage.py syncdb``` to create the required database tables, and ```./manage.py airports``` to import all of the airports data. **NOTE:** This can take some time.
 
+Please see ``example`` application. This application is used to manually test the functionalities of this package. This also serves as a good example.
 
-### Example
-
-Please see `example` application. This application is used to manually test the functionalities of this package. This also serves as a good example.
+You need only Django 1.4 or above to run that. It might run on older versions but that is not tested.
 
 ### Notes
 
