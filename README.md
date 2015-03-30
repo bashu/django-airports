@@ -35,7 +35,7 @@ INSTALLED_APPS = (
 Then run ```./manage.py syncdb``` to create the required database tables, and ```./manage.py airports``` to import all of the airports data. **NOTE:** This can take some time.
 
 
-### Examples
+### Example
 
 Please see `example` application. This application is used to manually test the functionalities of this package. This also serves as a good example.
 
