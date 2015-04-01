@@ -1,7 +1,7 @@
 django-airports
 ===
 
-### Airport models and worldwide airport data for Django
+### Airport model and worldwide airport data for Django
 
 ----
 
