@@ -12,7 +12,7 @@ setup(
     packages=['airports'],
     include_package_data=True,
     license='MIT License',
-    description='Airport models and worldwide airport data for Django',
+    description='Airport model and worldwide airport data for Django',
     long_description=README,
     url='http://github.com/bashu/django-airports',
     author='Basil Shubin',
