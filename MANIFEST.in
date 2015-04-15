@@ -1,5 +1,3 @@
 include LICENSE
 include README.md
 recursive-include airports/locale *
-recursive-include airports/migrations *
-recursive-include airports/management *

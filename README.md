@@ -23,7 +23,7 @@ You must have *django-cities* installed and configured, see the [django-cities d
 
 Either clone this repository into your project, or install with ```pip install django-airports```
 
-You'll need to add ```airports``` to ```INSTALLED_APPS``` in your projects ```settings.py``` file:
+You'll need to add ```airports``` to ```INSTALLED_APPS``` in your project's ```settings.py``` file:
 
 ```python
 INSTALLED_APPS = (
