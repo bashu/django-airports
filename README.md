@@ -26,10 +26,17 @@ Either clone this repository into your project, or install with ```pip install d
 You'll need to add ```airports``` to ```INSTALLED_APPS``` in your project's ```settings.py``` file:
 
 ```python
+import django
+
 INSTALLED_APPS = (
     ...
     'airports',
 )
+
+if django.VERSION < (1, 7):
+    INSTALLED_APPS += (
+        'south',
+    )
 ```
 
 Then run ```./manage.py syncdb``` to create the required database tables, and ```./manage.py airports``` to import all of the airports data. **NOTE:** This can take some time.
