@@ -2,6 +2,8 @@
 
 import os
 
+import django
+
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 DEBUG = True
@@ -42,6 +44,11 @@ INSTALLED_APPS = [
     'cities',
 ] + PROJECT_APPS
 
+if django.VERSION < (1, 7):
+    INSTALLED_APPS += [
+        'south',
+    ]
+        
 SITE_ID = 1
 
 ROOT_URLCONF = 'example.urls'
