@@ -7,7 +7,7 @@ django-airports
 
 django-airports provides you with airport related model and data (from [OpenFlights](http://openflights.org/)) that can be used in your django projects.
 
-Authored by [Basil Shubin](http://resume.github.io/?bashu), inspired by [django-cities](https://github.com/coderholic/django-cities)
+Authored by [Basil Shubin](https://github.com/bashu), inspired by [django-cities](https://github.com/coderholic/django-cities)
 
 [![Latest Version](https://pypip.in/version/django-airports/badge.svg)](https://pypi.python.org/pypi/django-airports/)
 [![Downloads](https://pypip.in/download/django-airports/badge.svg)](https://pypi.python.org/pypi/django-airports/)
@@ -26,10 +26,17 @@ Either clone this repository into your project, or install with ```pip install d
 You'll need to add ```airports``` to ```INSTALLED_APPS``` in your project's ```settings.py``` file:
 
 ```python
+import django
+
 INSTALLED_APPS = (
     ...
     'airports',
 )
+
+if django.VERSION < (1, 7):
+    INSTALLED_APPS += (
+        'south',
+    )
 ```
 
 Then run ```./manage.py syncdb``` to create the required database tables, and ```./manage.py airports``` to import all of the airports data. **NOTE:** This can take some time.

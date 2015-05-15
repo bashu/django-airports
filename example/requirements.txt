@@ -1,4 +1,5 @@
-django>=1.7
+django
 django-cities
 requests
 psycopg2
+south
