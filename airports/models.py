@@ -24,7 +24,7 @@ class Airport(models.Model):
 
     objects = models.GeoManager()
 
-    class Meta:
+    class Meta:  # pylint: disable=C1001
         ordering = ['airport_id']
 
     def __unicode__(self):
