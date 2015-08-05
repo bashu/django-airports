@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 class Airport(models.Model):
 
-    airport_id = models.PositiveIntegerField(primary_key=True)
+    airport_id = models.PositiveIntegerField(primary_key=True, editable=False)
 
     name = models.CharField(_("name"), max_length=100)
 
