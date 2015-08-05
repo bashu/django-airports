@@ -22,7 +22,7 @@ setup(
         'django-cities',
     ],    
     classifiers=[
-        "Development Status :: 5 - Production/Stable",
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',
