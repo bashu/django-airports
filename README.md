@@ -12,6 +12,7 @@ Authored by [Basil Shubin](https://github.com/bashu), inspired by [django-cities
 [![Latest Version](https://img.shields.io/pypi/v/django-airports.svg)](https://pypi.python.org/pypi/django-airports/)
 [![Downloads](https://img.shields.io/pypi/dm/django-airports.svg)](https://pypi.python.org/pypi/django-airports/)
 [![License](https://img.shields.io/github/license/bashu/django-airports.svg)](https://pypi.python.org/pypi/django-airports/)
+[![Code Health](https://landscape.io/github/bashu/django-airports/develop/landscape.svg?style=flat)](https://landscape.io/github/bashu/django-airports/develop)
 
 ----
 
