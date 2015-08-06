@@ -92,15 +92,15 @@ STATIC_URL = '/static/'
 # Override the default source files and URLs
 CITIES_FILES = {
     'city': {
-       'filename': 'cities1000.zip',
-       'urls':     ['http://download.geonames.org/export/dump/'+'{filename}']
+        'filenames': ["GB.zip", "ES.zip"],
+        'urls': ['http://download.geonames.org/export/dump/'+'{filename}'],
     },
 }
-CITIES_POSTAL_CODES = ['ALL']
-CITIES_LOCALES = ['ALL']
+CITIES_LOCALES = ['RU']
 
 CITIES_PLUGINS = [
-    'cities.plugin.postal_code_ca.Plugin',  # Canada postal codes need region codes remapped to match geonames
+    'cities.plugin.postal_code_ca.Plugin', # Canada postal codes need region codes remapped to match geonames
+    'cities.plugin.reset_queries.Plugin', # plugin that helps to reduce memory usage when importing large datasets
 ]
 
 LOGGING = {
@@ -120,6 +120,11 @@ LOGGING = {
         },
     'loggers': {
         'airports': {
+            'handlers': ['log_to_stdout'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'cities': {
             'handlers': ['log_to_stdout'],
             'level': 'INFO',
             'propagate': True,
