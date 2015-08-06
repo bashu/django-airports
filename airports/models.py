@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
 
 from django.contrib.gis.db import models
+try:
+    from django.utils.encoding import force_unicode as force_text
+except (NameError, ImportError):
+    from django.utils.encoding import force_text
+from django.utils.encoding import python_2_unicode_compatible
 from django.core.validators import MinLengthValidator
 from django.utils.translation import gettext_lazy as _
 
 
+@python_2_unicode_compatible
 class Airport(models.Model):
 
     airport_id = models.PositiveIntegerField(primary_key=True, editable=False)
@@ -27,5 +33,5 @@ class Airport(models.Model):
     class Meta:  # pylint: disable=C1001
         ordering = ['airport_id']
 
-    def __unicode__(self):
-        return self.name
+    def __str__(self):
+        return force_text(self.name)

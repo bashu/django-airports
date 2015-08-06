@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 import os
 import csv
 import sys
@@ -21,7 +19,7 @@ from cities.models import Country, City
 
 from ...models import Airport
 
-ENDPOINT_URL = "https://sourceforge.net/p/openflights/code/HEAD/tree/openflights/data/airports.dat?format=raw"
+ENDPOINT_URL = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat"
 
 APP_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..'))
 
@@ -47,33 +45,37 @@ class Command(BaseCommand):
             self.flush_airports()
         else:
             columns = self.default_format.split(',')
-            columns = dict(itertools.izip(columns, itertools.count()))
+            columns = dict(list(zip(columns, itertools.count())))
 
-            try:
-                with open(self.download(), 'rb') as f:
-                    self.stdout.flush()
-                    try:
-                        importer = DataImporter(columns, self.stdout, self.stderr)
-                    except Exception:
-                        raise CommandError('Can not continue processing')
+            with open(self.download(), 'rt') as f:
+                self.stdout.flush()
+                try:
+                    importer = DataImporter(columns, self.stdout, self.stderr)
+                except Exception:
+                    raise CommandError('Can not continue processing')
 
-                    importer.start(f)
-            except IOError as e:
-                raise CommandError('Can not open file: {0}'.format(e))
+                importer.start(f)
 
     def download(self, filename='airports.dat'):
         logger.info("Downloading: " + filename)        
         response = requests.post(ENDPOINT_URL, data={})
 
-        filepath = os.path.join(self.data_dir, filename)
-        if not os.path.exists(self.data_dir):
-            os.makedirs(self.data_dir)
+        if response.status_code != 200:
+            response.raise_for_status()
 
-        fobj = open(filepath, 'w')
-        fobj.write(response.text.encode('utf-8'))
-        fobj.close()
+        try:
+            filepath = os.path.join(self.data_dir, filename)
+            if not os.path.exists(self.data_dir):
+                os.makedirs(self.data_dir)
 
-        return filepath
+            fobj = open(filepath, 'wb')
+            fobj.write(response.text.encode('utf-8'))
+            fobj.close()
+
+            return filepath
+
+        except IOError as e:
+            raise CommandError('Can not open file: {0}'.format(e))
 
     def flush_airports(self):
         logger.info("Flushing airports data")
@@ -90,25 +92,26 @@ class DataImporter(object):
         self.countries = self.cities = {}  # cache
         self.saved_airports = set()
 
-    def start(self, f, encoding='utf8'):
+    def start(self, f): #, encoding='utf8'):
         logger.info("Importing airports data")
         columns = self.columns
 
         dialect = csv.Sniffer().sniff(f.read(1024))
         f.seek(0)
-        if encoding:
-            try:
-                f.readline().decode(encoding)
-            except UnicodeDecodeError as e:
-                raise Exception('Invalid encoding: {0}'.format(encoding))
+        # if encoding:
+        #     try:
+        #         f.readline().decode(encoding)
+        #     except UnicodeDecodeError:
+        #         raise Exception('Invalid encoding: {0}'.format(encoding))
+        #     except AttributeError:
+        #         pass
         f.seek(0)
         reader = csv.reader(f, dialect)
 
-        rows = 0
         for row in reader:
             try:
-                if (encoding):
-                    row = map(lambda c: c.decode(encoding), row)
+                # if (encoding):
+                #     row = [c.decode(encoding) for c in row]
 
                 airport_id = row[columns['airport_id']]
                 if airport_id in self.saved_airports:
@@ -116,27 +119,26 @@ class DataImporter(object):
 
                 country = self.get_country(row[columns['country_name']], row)
                 if not bool(country): 
-                    logger.warning("Airport: {0}: Cannot find country: {1} -- skipping".format(
-                        row[columns['name']], row[columns['country_name']]))
+                    logger.warning("Airport: %s: Cannot find country: %s -- skipping",
+                        row[columns['name']], row[columns['country_name']])
                     continue  # unable to get related country
 
                 city = self.get_city(row[columns['city_name']], row, country)
                 if not bool(city):
-                    logger.warning("Airport: {0}: Cannot find city: {1} -- skipping".format(
-                        row[columns['name']], row[columns['city_name']]))
+                    logger.warning("Airport: %s: Cannot find city: %s -- skipping",
+                        row[columns['name']], row[columns['city_name']])
                     continue  # unable to get related city
 
                 airport = self.get_airport(airport_id, row, city)
                 if not airport:
                     continue
 
-                logger.debug("Added airport: {0}".format(airport))
+                logger.debug("Added airport: %s", airport)
 
                 if airport_id not in self.saved_airports:
                     self.saved_airports.add(airport_id)
 
-                rows += 1
-            except IndexError as e:
+            except IndexError:
                 pass
 
     def get_country(self, name, row):
@@ -196,7 +198,7 @@ class DataImporter(object):
         if icao == r'\N': icao = ''
         try:
             altitude = round(int(row[cols['altitude']].strip()) * 0.3048, 2)
-        except:
+        except Exception:
             altitude = 0.0
 
         return Airport.objects.create(
