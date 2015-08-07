@@ -92,27 +92,16 @@ class DataImporter(object):
         self.countries = self.cities = {}  # cache
         self.saved_airports = set()
 
-    def start(self, f): #, encoding='utf8'):
+    def start(self, f):
         logger.info("Importing airports data")
         columns = self.columns
 
         dialect = csv.Sniffer().sniff(f.read(1024))
         f.seek(0)
-        # if encoding:
-        #     try:
-        #         f.readline().decode(encoding)
-        #     except UnicodeDecodeError:
-        #         raise Exception('Invalid encoding: {0}'.format(encoding))
-        #     except AttributeError:
-        #         pass
-        f.seek(0)
         reader = csv.reader(f, dialect)
 
         for row in reader:
             try:
-                # if (encoding):
-                #     row = [c.decode(encoding) for c in row]
-
                 airport_id = row[columns['airport_id']]
                 if airport_id in self.saved_airports:
                     continue  # already saved
