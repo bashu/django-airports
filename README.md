@@ -50,4 +50,3 @@ You need Django 1.4 or above to run that. It might run on older versions but tha
 
 The ```airports``` manage command has options, see ```airports --help``` output.  Verbosity is controlled through LOGGING.
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/bashu/django-airports/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
