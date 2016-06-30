@@ -58,7 +58,7 @@ class Command(BaseCommand):
 
     def download(self, filename='airports.dat'):
         logger.info("Downloading: " + filename)        
-        response = requests.post(ENDPOINT_URL, data={})
+        response = requests.get(ENDPOINT_URL, data={})
 
         if response.status_code != 200:
             response.raise_for_status()
@@ -140,13 +140,16 @@ class DataImporter(object):
         qs = Country.objects.all()
 
         try:
-            c = qs.get(Q(name__iexact=name) | Q(alt_names__name__iexact=name))  # first attempt
-        except (Country.DoesNotExist, MultipleObjectsReturned):
+            c = qs.get(name__iexact=name)  # first attempt
+        except Country.DoesNotExist:
             try:
-                c = qs.filter(city__in=City.objects.filter(
-                    location__distance_lte=(point, D(km=25))))[0]  # second attempt
-            except KeyError:
-                c = None  # shit happens
+                c = qs.get(alt_names__name__iexact=name)  # second attempt
+            except (Country.DoesNotExist, MultipleObjectsReturned):
+                try:
+                    c = qs.filter(city__in=City.objects.filter(
+                        location__distance_lte=(point, D(km=25))))[0]  # third attempt
+                except IndexError:
+                    c = None  # shit happens
 
         cache[name] = c
         return c
@@ -162,13 +165,16 @@ class DataImporter(object):
         qs = City.objects.distance(point).filter(country=country)
 
         try:
-            c = qs.get(Q(name_std__iexact=name) | Q(name__iexact=name) | Q(alt_names__name__iexact=name))
+            c = qs.get(name_std__iexact=name)
         except (City.DoesNotExist, MultipleObjectsReturned):
             try:
-                c = qs.exclude(
-                    location__distance_gte=(point, D(km=50))).order_by('distance')[0]
-            except IndexError:
-                c = None
+                c = qs.get(Q(name__iexact=name) | Q(alt_names__name__iexact=name))
+            except (City.DoesNotExist, MultipleObjectsReturned):
+                try:
+                    c = qs.exclude(
+                        location__distance_gte=(point, D(km=50))).order_by('distance')[0]
+                except IndexError:
+                    c = None
 
         cache[(iso, name)] = c
         return c
