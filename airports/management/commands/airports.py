@@ -58,7 +58,7 @@ class Command(BaseCommand):
 
     def download(self, filename='airports.dat'):
         logger.info("Downloading: " + filename)        
-        response = requests.post(ENDPOINT_URL, data={})
+        response = requests.get(ENDPOINT_URL, data={})
 
         if response.status_code != 200:
             response.raise_for_status()
