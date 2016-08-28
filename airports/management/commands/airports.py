@@ -9,6 +9,7 @@ import itertools
 
 from optparse import make_option
 
+import django
 from django.db.models import Q
 from django.contrib.gis.measure import D
 from django.contrib.gis.geos import Point
@@ -32,11 +33,20 @@ class Command(BaseCommand):
     default_format = 'airport_id,name,city_name,country_name,iata,icao,latitude,longitude,altitude,timezone,dst'
 
     help = """Imports airport data from CSV into DB, complementing it with country/city information"""
-    option_list = BaseCommand.option_list + (
-        make_option('--flush', action='store_true', default=False,
+    if django.VERSION < (1, 8):
+        option_list = BaseCommand.option_list + (
+            make_option('--flush', action='store_true', default=False,
+                help="Flush airports data."
+            ),
+        )
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--flush',
+            action='store_true',
+            default=False,
             help="Flush airports data."
-        ),
-    )
+        )
 
     def handle(self, *args, **options):
         self.options = options
