@@ -1,5 +1,3 @@
-django
-django-cities
-requests
-psycopg2
-south
+Django==1.11
+django-cities==0.5.0.6
+

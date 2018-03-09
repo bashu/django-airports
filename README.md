@@ -21,6 +21,10 @@ Authored by [Basil Shubin](https://github.com/bashu), inspired by [django-cities
 You must have *django-cities* installed and configured, see the [django-cities documentation](https://github.com/coderholic/django-cities) for details and setup instructions.
 
 ### Setup
+On Ubuntu, install gdal library:
+```bash
+sudo apt-get install gdal-bin
+```
 
 Either clone this repository into your project, or install with ```pip install django-airports```
 
@@ -50,3 +54,5 @@ You need Django 1.4 or above to run that. It might run on older versions but tha
 
 The ```airports``` manage command has options, see ```airports --help``` output.  Verbosity is controlled through LOGGING.
 
+### Development:
+Look at the example folder.
