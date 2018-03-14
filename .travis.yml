@@ -5,6 +5,10 @@ language: python
 python:
   - "3.6"
 
+os: linux
+
+dist: xenial
+
 env:
   - TOX_ENV=py36-django-20
   - TOX_ENV=py35-django-20
@@ -12,11 +16,7 @@ env:
 
 matrix:
   fast_finish: true
-  include:
-      - os: linux
-        dist: xenial
-        sudo: required
-        
+
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 before_install:
   - sudo apt-get -qq update
