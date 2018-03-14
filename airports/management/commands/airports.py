@@ -223,10 +223,13 @@ class DataImporter(object):
             if Airport.objects.filter(airport_id=airport_id).all().count() == 0:
                 city = get_city(city_name, latitude=latitude, longitude=longitude)
                 if city is None:
-                    logger.warning(f'Airport: {name}: Cannot find city: {city_name}.')
+                    logger.warning(
+                        'Airport: {name}: Cannot find city: {city_name}.'.format(name=name, city_name=city_name))
 
                 country = get_country(country_name, city)
                 if country is None:
-                    logger.warning(f'Airport:  {name}: Cannot find country: {country_name}')
+                    logger.warning(
+                        'Airport:  {name}: Cannot find country: {country_name}'\
+                            .format(name=name, country_name=country_name))
 
                 airport = get_airport(airport_id, longitude, latitude, name, iata, icao, altitude, city, country)
