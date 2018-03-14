@@ -1,3 +1,5 @@
-Django==1.11
-django-cities==0.5.0.6
+# Your app requirements.
+-r ../requirements_test.txt
 
+# Your app in editable mode.
+-e ../

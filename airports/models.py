@@ -32,8 +32,8 @@ class Airport(models.Model):
     altitude = models.FloatField(_("altitude"), default=0)
     location = models.PointField(_("location"))
 
-    country = models.ForeignKey('cities.Country', on_delete=models.DO_NOTHING)
-    city = models.ForeignKey('cities.City', on_delete=models.DO_NOTHING)
+    country = models.ForeignKey('cities.Country', on_delete=models.DO_NOTHING, null=True)
+    city = models.ForeignKey('cities.City', on_delete=models.DO_NOTHING, null=True)
 
     objects = GeoManager()
 

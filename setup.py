@@ -1,42 +1,77 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import os
-from setuptools import setup, find_packages
+import re
+import sys
 
-README = open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
-# allow setup.py to be run from any path
-os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
-from airports import __version__
+def get_version(*file_paths):
+    """Retrieves the version from airports/__init__.py"""
+    filename = os.path.join(os.path.dirname(__file__), *file_paths)
+    version_file = open(filename).read()
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError('Unable to find version string.')
+
+
+version = get_version("airports", "__init__.py")
+
+
+if sys.argv[-1] == 'publish':
+    try:
+        import wheel
+        print("Wheel version: ", wheel.__version__)
+    except ImportError:
+        print('Wheel library missing. Please run "pip install wheel"')
+        sys.exit()
+    os.system('python setup.py sdist upload')
+    os.system('python setup.py bdist_wheel upload')
+    sys.exit()
+
+if sys.argv[-1] == 'tag':
+    print("Tagging the version on git:")
+    os.system("git tag -a %s -m 'version %s'" % (version, version))
+    os.system("git push --tags")
+    sys.exit()
+
+readme = open('README.rst').read()
+history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='django-airports',
-    version=__version__,
-    packages=find_packages(exclude=['example']),
+    version=version,
+    description=""" It's like django-cities, but django-airports """,
+    long_description=readme + '\n\n' + history,
+    author='Antonio Ercole De Luca',
+    author_email='eracle@posteo.eu',
+    url='https://github.com/eracle/django-airports',
+    packages=[
+        'airports',
+    ],
     include_package_data=True,
-    license='MIT License',
-    description='Airport model and worldwide airport data for Django',
-    long_description=README,
-    url='http://github.com/bashu/django-airports',
-    author='Basil Shubin',
-    author_email='basil.shubin@gmail.com',
-    install_requires=[
-        'requests',
-        'django-cities',
-    ],    
+    install_requires=["django-model-utils>=2.0",],
+    license="MIT",
+    zip_safe=False,
+    keywords='django-airports',
     classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Environment :: Web Environment',
+        'Development Status :: 3 - Alpha',
         'Framework :: Django',
+        'Framework :: Django :: 2.0',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
+        'License :: OSI Approved :: BSD License',
+        'Natural Language :: English',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
-        'Topic :: Internet :: WWW/HTTP',
-        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
-    zip_safe=False,
 )
