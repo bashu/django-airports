@@ -20,6 +20,9 @@ The full documentation is at https://django-airports.readthedocs.io.
 
 Quickstart
 ----------
+Requirements::
+
+    sudo apt-get install -y libsqlite3-mod-spatialite binutils libproj-dev gdal-bin
 
 Install django-airports::
 
