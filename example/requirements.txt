@@ -1,5 +1,5 @@
-django
-django-cities
-requests
-psycopg2
-south
+# Your app requirements.
+-r ../requirements_test.txt
+
+# Your app in editable mode.
+-e ../
