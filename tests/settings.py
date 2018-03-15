@@ -1,6 +1,8 @@
 # -*- coding: utf-8
 from __future__ import unicode_literals, absolute_import
 
+import distro
+
 import django
 
 DEBUG = True
@@ -9,7 +11,10 @@ USE_TZ = True
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "!2*nm%ps%x8!ykyb^s9+!l1vcmeh+(f&de%br=js*7(5i_rmet"
 
-#SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
+# needed since travis uses Ubuntu 14.04
+if distro.linux_distribution() == ('Ubuntu', '16.04', 'Xenial Xerus'):
+    SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
+
 DATABASES = {
     "default": {
         "ENGINE": 'django.contrib.gis.db.backends.spatialite',
