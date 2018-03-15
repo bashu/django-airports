@@ -1,30 +1,126 @@
 # -*- coding: utf-8 -*-
 
-import os
 import csv
-import sys
-import logging
-import requests
 import itertools
-
+import logging
+import os
+import sys
 from optparse import make_option
 
 import django
-from django.db.models import Q
-from django.contrib.gis.measure import D
-from django.contrib.gis.geos import Point
-from django.core.exceptions import MultipleObjectsReturned
-from django.core.management.base import BaseCommand, CommandError
-
+import requests
 from cities.models import Country, City
+from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.geos import Point
+from django.core.management import call_command
+from django.core.management.base import BaseCommand, CommandError
+from django.db.models import Q
+from tqdm import tqdm
 
-from ...models import Airport
+from airports.models import Airport
 
 ENDPOINT_URL = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat"
+
+"""
+Maximum distance used to filter out too distant cities.
+"""
+MAX_DISTANCE_KM = 200
 
 APP_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..'))
 
 logger = logging.getLogger("airports")
+
+
+def get_airport(airport_id, longitude, latitude, name, iata, icao, altitude, city, country):
+    """
+
+    :param airport_id:
+    :param longitude:
+    :param latitude:
+    :param name:
+    :param iata:
+    :param icao:
+    :param altitude:
+    :param city:
+    :param country:
+    :return:
+    """
+    point = Point(longitude, latitude, srid=4326)
+
+    name = name or city.name
+
+    if icao == r'\N':
+        icao = ''
+    try:
+        altitude = round(altitude * 0.3048, 2)
+    except Exception:
+        altitude = 0.0
+
+    airport, created = Airport.objects.get_or_create(
+        iata=iata, icao=icao, name=name, airport_id=airport_id,
+        altitude=altitude, location=point, country=country, city=city,
+    )
+    if created:
+        logger.debug("Added airport: %s", airport)
+    return airport
+
+
+def get_country(name, city):
+    """
+
+    :param name:
+    :param city:
+    :return:
+    """
+
+    qs_all = Country.objects.all()
+
+    qs = qs_all.filter(name__iexact=name)  # first attempt
+    if qs.count() == 1:
+        return qs.first()
+
+    qs = qs_all.filter(alt_names__name__iexact=name)  # second attempt
+    if qs.count() == 1:
+        return qs.first()
+
+    if city is not None:
+        qs = qs_all.filter(cities=city)
+        if qs.count() >= 1:
+            return qs.first()  # third attempt
+
+    return None
+
+
+def get_city(name, latitude, longitude):
+    """
+
+    :param name:
+    :param latitude:
+    :param longitude:
+    :return: None if something wrong.
+    """
+
+    point = Point(latitude, longitude, srid=4326)
+
+    qs_all = City.objects.all()
+
+    qs = qs_all.filter(name_std__iexact=name)
+    if qs.count() == 1:
+        return qs.first()
+
+    qs = qs_all.filter(Q(name__iexact=name) | Q(alt_names__name__iexact=name))
+    if qs.count() == 1:
+        return qs.first()
+
+    qs = qs_all.all() \
+        .annotate(distance=Distance('location', point)) \
+        .filter(distance__lte=MAX_DISTANCE_KM * 1000) \
+        .order_by('distance').all()
+
+    if qs.count() >= 1:
+        return qs.first()
+    else:
+        return None
 
 
 class Command(BaseCommand):
@@ -36,8 +132,8 @@ class Command(BaseCommand):
     if django.VERSION < (1, 8):
         option_list = BaseCommand.option_list + (
             make_option('--flush', action='store_true', default=False,
-                help="Flush airports data."
-            ),
+                        help="Flush airports data."
+                        ),
         )
 
     def add_arguments(self, parser):
@@ -49,6 +145,10 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        logger.info('Checking countries and cities')
+        if City.objects.all().count() == 0 or Country.objects.all().count() == 0:
+            call_command('cities', '--import', 'country,city')
+
         self.options = options
 
         if self.options['flush'] is True:
@@ -67,7 +167,7 @@ class Command(BaseCommand):
                 importer.start(f)
 
     def download(self, filename='airports.dat'):
-        logger.info("Downloading: " + filename)        
+        logger.info("Downloading: " + filename)
         response = requests.get(ENDPOINT_URL, data={})
 
         if response.status_code != 200:
@@ -93,120 +193,43 @@ class Command(BaseCommand):
 
 
 class DataImporter(object):
-
     def __init__(self, columns, stdout=sys.stdout, stderr=sys.stderr):
         self.columns = columns
         self.stdout = stdout
         self.stderr = stderr
 
-        self.countries = self.cities = {}  # cache
-        self.saved_airports = set()
-
     def start(self, f):
-        logger.info("Importing airports data")
         columns = self.columns
 
         dialect = csv.Sniffer().sniff(f.read(1024))
         f.seek(0)
         reader = csv.reader(f, dialect)
 
-        for row in reader:
-            try:
-                airport_id = row[columns['airport_id']]
-                if airport_id in self.saved_airports:
-                    continue  # already saved
+        for row in tqdm([r for r in reader],
+                        desc="Importing Airports"
+                        ):
+            airport_id = row[columns['airport_id']]
+            latitude = float(row[columns['latitude']])
+            longitude = float(row[columns['longitude']])
+            city_name = row[columns['city_name']]
+            country_name = row[columns['country_name']]
 
-                country = self.get_country(row[columns['country_name']], row)
-                if not bool(country): 
-                    logger.warning("Airport: %s: Cannot find country: %s -- skipping",
-                        row[columns['name']], row[columns['country_name']])
-                    continue  # unable to get related country
+            name = row[columns['name']].strip()
+            iata = row[columns['iata']].strip()
+            icao = row[columns['icao']].strip()
 
-                city = self.get_city(row[columns['city_name']], row, country)
-                if not bool(city):
-                    logger.warning("Airport: %s: Cannot find city: %s -- skipping",
-                        row[columns['name']], row[columns['city_name']])
-                    continue  # unable to get related city
+            altitude = int(row[columns['altitude']].strip())
 
-                airport = self.get_airport(airport_id, row, city)
-                if not airport:
-                    continue
+            if Airport.objects.filter(airport_id=airport_id).all().count() == 0:
+                city = get_city(city_name, latitude=latitude, longitude=longitude)
+                if city is None:
+                    logger.warning(
+                        'Airport: {name}: Cannot find city: {city_name}.'.format(name=name, city_name=city_name))
 
-                logger.debug("Added airport: %s", airport)
+                country = get_country(country_name, city)
+                if country is None:
+                    logger.warning(
+                        'Airport:  {name}: Cannot find country: {country_name}'\
+                            .format(name=name, country_name=country_name))
 
-                if airport_id not in self.saved_airports:
-                    self.saved_airports.add(airport_id)
-
-            except IndexError:
-                pass
-
-    def get_country(self, name, row):
-        cols, cache = self.columns, self.countries
-
-        if name in cache:
-            return cache[name]
-
-        point = Point(float(row[cols['longitude']]), float(row[cols['latitude']]))
-        qs = Country.objects.all()
-
-        try:
-            c = qs.get(name__iexact=name)  # first attempt
-        except Country.DoesNotExist:
-            try:
-                c = qs.get(alt_names__name__iexact=name)  # second attempt
-            except (Country.DoesNotExist, MultipleObjectsReturned):
-                try:
-                    c = qs.filter(city__in=City.objects.filter(
-                        location__distance_lte=(point, D(km=25))))[0]  # third attempt
-                except IndexError:
-                    c = None  # shit happens
-
-        cache[name] = c
-        return c
-
-    def get_city(self, name, row, country):
-        cols, cache = self.columns, self.cities
-
-        iso = country.code
-        if (iso, name) in cache:
-            return cache[(iso, name)]
-
-        point = Point(float(row[cols['longitude']]), float(row[cols['latitude']]))
-        qs = City.objects.distance(point).filter(country=country)
-
-        try:
-            c = qs.get(name_std__iexact=name)
-        except (City.DoesNotExist, MultipleObjectsReturned):
-            try:
-                c = qs.get(Q(name__iexact=name) | Q(alt_names__name__iexact=name))
-            except (City.DoesNotExist, MultipleObjectsReturned):
-                try:
-                    c = qs.exclude(
-                        location__distance_gte=(point, D(km=50))).order_by('distance')[0]
-                except IndexError:
-                    c = None
-
-        cache[(iso, name)] = c
-        return c
-
-    def get_airport(self, airport_id, row, city):
-        cols = self.columns
-
-        try:
-            return Airport.objects.get(airport_id=airport_id)
-        except Airport.DoesNotExist:
-            pass
-
-        point = Point(float(row[cols['longitude']]), float(row[cols['latitude']]))
-        name = row[cols['name']].strip() or city.name
-        iata, icao = row[cols['iata']].strip(), row[cols['icao']].strip()
-        if icao == r'\N': icao = ''
-        try:
-            altitude = round(int(row[cols['altitude']].strip()) * 0.3048, 2)
-        except Exception:
-            altitude = 0.0
-
-        return Airport.objects.create(
-            iata=iata, icao=icao, name=name, airport_id=airport_id,
-            altitude=altitude, location=point, country=city.country, city=city,
-        )
+                airport = get_airport(airport_id, longitude, latitude, name, iata, icao, altitude, city, country)
