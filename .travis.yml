@@ -7,7 +7,7 @@ python:
 
 os: linux
 
-dist: trusty
+dist: xenial
 
 env:
   - TOX_ENV=py36-django-20
@@ -18,9 +18,7 @@ matrix:
   fast_finish: true
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y libspatialite5 binutils libproj-dev gdal-bin
+before_install: sudo apt-get install -y libsqlite3-mod-spatialite binutils libproj-dev gdal-bin
 
 install: pip install -r requirements_test.txt
 

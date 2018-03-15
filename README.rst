@@ -20,7 +20,7 @@ The full documentation is at https://django-airports.readthedocs.io.
 
 Quickstart
 ----------
-Requirements::
+Requirements (Ubuntu 16.04)::
 
     sudo apt-get install -y libsqlite3-mod-spatialite binutils libproj-dev gdal-bin
 
