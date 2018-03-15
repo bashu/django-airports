@@ -2,24 +2,14 @@
 
 language: python
 
-python:
-  - "3.6"
-
-os: linux
-
-dist: trusty
-
 env:
   - TOX_ENV=py36-django-20
   - TOX_ENV=py35-django-20
   - TOX_ENV=py34-django-20
 
-matrix:
-  fast_finish: true
-
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 before_install:
-  - sudo apt-get update -q
+  - sudo apt-get -qq update
   - sudo apt-get install -y spatialite-bin binutils libproj-dev gdal-bin
 
 install: pip install -r requirements_test.txt

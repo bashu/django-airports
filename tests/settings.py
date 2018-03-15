@@ -12,7 +12,7 @@ USE_TZ = True
 SECRET_KEY = "!2*nm%ps%x8!ykyb^s9+!l1vcmeh+(f&de%br=js*7(5i_rmet"
 
 # Travis uses trusty which have no mod_spatialite
-if not os.environ.get('TRAVIS'):
+if 'TRAVIS' in os.environ:
     SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
 
 DATABASES = {
