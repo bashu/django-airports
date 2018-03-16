@@ -24,10 +24,18 @@ class Airport(models.Model):
 
     name = models.CharField(_("name"), max_length=100)
 
-    iata = models.CharField(_("IATA/FAA code"), blank=True, max_length=3,
-                            validators=[MinLengthValidator(3)])
-    icao = models.CharField(_("ICAO code"), blank=True, max_length=4,
-                            validators=[MinLengthValidator(4)])
+    iata = models.CharField(_("IATA/FAA code"),
+                            blank=True,
+                            max_length=3,
+                            validators=[MinLengthValidator(3)],
+                            db_index=True
+                            )
+
+    icao = models.CharField(_("ICAO code"),
+                            blank=True,
+                            max_length=4,
+                            validators=[MinLengthValidator(4)]
+                            )
 
     altitude = models.FloatField(_("altitude"), default=0)
     location = models.PointField(_("location"))
