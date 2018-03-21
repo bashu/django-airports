@@ -49,9 +49,9 @@ setup(
     version=version,
     description=""" It's like django-cities, but django-airports """,
     long_description=readme + '\n\n' + history,
-    author='Antonio Ercole De Luca',
-    author_email='eracle@posteo.eu',
-    url='https://github.com/eracle/django-airports',
+    author='Basil Shubin',
+    author_email='basil.shubin@gmail.com',
+    url='https://github.com/bashu/django-airports',
     packages=[
         'airports',
     ],
