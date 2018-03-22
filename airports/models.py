@@ -20,15 +20,14 @@ else:
 
 @python_2_unicode_compatible
 class Airport(models.Model):
-    airport_id = models.PositiveIntegerField(primary_key=True, editable=False)
-
     name = models.CharField(_("name"), max_length=100)
 
     iata = models.CharField(_("IATA/FAA code"),
                             blank=True,
                             max_length=3,
                             validators=[MinLengthValidator(3)],
-                            db_index=True
+                            db_index=True,
+                            primary_key=True
                             )
 
     icao = models.CharField(_("ICAO code"),
@@ -46,7 +45,7 @@ class Airport(models.Model):
     objects = GeoManager()
 
     class Meta:  # pylint: disable=C1001
-        ordering = ['airport_id']
+        ordering = ['iata']
 
     def __str__(self):
         return force_text(self.name)

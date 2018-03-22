@@ -1,9 +1,40 @@
+import csv
+import io
+import itertools
+
 from cities.models import Country, City
 from django.contrib.gis.geos import Point
 from django.test import TestCase
 
 from airports.management.commands.airports import get_city, get_country
-from airports.models import Airport
+from airports.management.commands.airports import get_lines, read_airports
+
+
+class TestCommandAirports3(TestCase):
+    def setUp(self):
+        default_format = 'airport_id,name,city_name,country_name,iata,icao,latitude,longitude,altitude,timezone,dst'
+
+        twolines = """1,"Goroka Airport","Goroka","Papua New Guinea","GKA","AYGA",-6.081689834590001,145.391998291,5282,10,"U","Pacific/Port_Moresby","airport","OurAirports"\n2,"Madang Airport","Madang","Papua New Guinea","MAG","AYMD",-5.20707988739,145.789001465,20,10,"U","Pacific/Port_Moresby","airport","OurAirports" """
+
+        columns = default_format.split(',')
+        self.csv = io.StringIO(twolines)
+
+        dialect = csv.Sniffer().sniff(self.csv.read(512))
+        self.csv.seek(0)
+        self.reader = csv.DictReader(self.csv, dialect=dialect, fieldnames=columns)
+
+        self.url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat"
+
+    def test_get_lines(self):
+        lines = get_lines(self.url)
+
+        self.assertTrue(len(next(lines)) > 10)
+        self.assertTrue(len(next(lines)) > 10)
+        self.assertTrue(len(next(lines)) > 10)
+
+    def test_read_airports(self):
+        airports = list(read_airports(self.reader))
+        self.assertEquals(len(airports), 2)
 
 
 class TestCommandAirports(TestCase):
