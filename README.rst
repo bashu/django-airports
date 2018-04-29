@@ -13,6 +13,12 @@ django-airports
 
 Provides airports' related models and data (from [OpenFlights](http://openflights.org/)) that can be used in  django projects, inspired by [django-cities](https://github.com/coderholic/django-cities)
 
+.. raw:: html
+
+   <p align="center">
+     <img src="https://raw.githubusercontent.com/bashu/django-airports/develop/airports/static/img/logo/horizontal.png" alt="django-airports">
+   </p>
+
 Documentation
 -------------
 
