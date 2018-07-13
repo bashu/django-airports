@@ -150,5 +150,5 @@ class TestCommandAirports2(TestCase):
         self.assertEqual(country, self.guinea)
 
         # by a city
-        country = get_country('Papua', self.city1)
+        country = get_country('Guinea', self.city1)
         self.assertEqual(country, self.guinea)
