@@ -1,27 +1,34 @@
 import csv
-import io
-import itertools
 
-from cities.models import Country, City
+from cities.models import Country, City, AlternativeName
 from django.contrib.gis.geos import Point
 from django.test import TestCase
 
-from airports.management.commands.airports import get_city, get_country
-from airports.management.commands.airports import get_lines, read_airports
+from airports.management.commands.airports_import import get_city, get_country
+from airports.management.commands.airports_import import get_lines, read_airports
+from airports.models import Airport
+
+# python 2&3 compatible
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 
 class TestCommandAirports3(TestCase):
     def setUp(self):
         default_format = 'airport_id,name,city_name,country_name,iata,icao,latitude,longitude,altitude,timezone,dst'
 
-        twolines = """1,"Goroka Airport","Goroka","Papua New Guinea","GKA","AYGA",-6.081689834590001,145.391998291,5282,10,"U","Pacific/Port_Moresby","airport","OurAirports"\n2,"Madang Airport","Madang","Papua New Guinea","MAG","AYMD",-5.20707988739,145.789001465,20,10,"U","Pacific/Port_Moresby","airport","OurAirports" """
+        twolines = """1,"Goroka Airport","Goroka","Papua New Guinea","GKA","AYGA",-6.081689834590001,145.391998291,5282,10,"U","Pacific/Port_Moresby","airport","OurAirports"
+        2,"Madang Airport","Madang","Papua New Guinea","MAG","AYMD",-5.20707988739,145.789001465,20,10,"U","Pacific/Port_Moresby","airport","OurAirports" """
 
-        columns = default_format.split(',')
-        self.csv = io.StringIO(twolines)
+        self.columns = default_format.split(',')
+        self.csv = StringIO(twolines)
 
-        dialect = csv.Sniffer().sniff(self.csv.read(512))
+        self.dialect = csv.Sniffer().sniff(self.csv.read(512))
+
         self.csv.seek(0)
-        self.reader = csv.DictReader(self.csv, dialect=dialect, fieldnames=columns)
+        self.reader = csv.DictReader(self.csv, dialect=self.dialect, fieldnames=self.columns)
 
         self.url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat"
 
@@ -35,6 +42,25 @@ class TestCommandAirports3(TestCase):
     def test_read_airports(self):
         airports = list(read_airports(self.reader))
         self.assertEquals(len(airports), 2)
+
+    def test_airports_updated(self):
+        # read them in first
+        list(read_airports(self.reader))
+
+        self.assertEquals(Airport.objects.count(), 2)
+        self.assertEqual(Airport.objects.get(airport_id=1).name, "Goroka Airport")
+        self.assertEqual(Airport.objects.get(airport_id=2).name, "Madang Airport")
+
+        # update the airports
+        csv_text = StringIO("""1,"Goro White Dog Airport","Goroka","Papua New Guinea","GKA","AYGA",-6.081689834590001,145.391998291,5282,10,"U","Pacific/Port_Moresby","airport","OurAirports"
+        2,"Vabank Airport","Madang","Papua New Guinea","MAG","AYMD",-5.20707988739,145.789001465,20,10,"U","Pacific/Port_Moresby","airport","OurAirports" """)
+        reader = csv.DictReader(csv_text, dialect=self.dialect, fieldnames=self.columns)
+
+        list(read_airports(reader))
+
+        self.assertEquals(Airport.objects.count(), 2)
+        self.assertEqual(Airport.objects.get(airport_id=1).name, "Goro White Dog Airport")
+        self.assertEqual(Airport.objects.get(airport_id=2).name, "Vabank Airport")
 
 
 class TestCommandAirports(TestCase):
@@ -113,5 +139,16 @@ class TestCommandAirports2(TestCase):
         city = get_city('test', self.airport_location.coords[0], self.airport_location.coords[1])
         self.assertIsNotNone(city)
 
-        country = get_country(self.airport_region_name, city)
+    def test_get_country(self):
+        # by name
+        country = get_country('Papua New Guinea', None)
+        self.assertEqual(country, self.guinea)
+
+        # by alt name
+        self.guinea.alt_names.add(AlternativeName.objects.create(name='Papua', language_code='en'))
+        country = get_country('Papua', None)
+        self.assertEqual(country, self.guinea)
+
+        # by a city
+        country = get_country('Papua', self.city1)
         self.assertEqual(country, self.guinea)

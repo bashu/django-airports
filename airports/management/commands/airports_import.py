@@ -29,9 +29,10 @@ APP_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file_
 logger = logging.getLogger("airports")
 
 
-def get_airport(longitude, latitude, name, iata, icao, altitude, city, country):
+def get_airport(airport_id, longitude, latitude, name, iata, icao, altitude, city, country):
     """
 
+    :param airport_id:
     :param longitude:
     :param latitude:
     :param name:
@@ -53,8 +54,9 @@ def get_airport(longitude, latitude, name, iata, icao, altitude, city, country):
     except Exception:
         altitude = 0.0
 
-    airport, created = Airport.objects.get_or_create(
-        iata=iata, icao=icao, name=name, altitude=altitude, location=point, country=country, city=city,
+    airport, created = Airport.objects.update_or_create(
+        airport_id=airport_id, defaults=dict(iata=iata, icao=icao, name=name, altitude=altitude,
+                                             location=point, country=country, city=city)
     )
     if created:
         logger.debug("Added airport: %s", airport)
@@ -129,6 +131,7 @@ def get_lines(download_url):
 def read_airports(reader):
     for row in reader:
         # print(row)
+        airport_id = row['airport_id']
         latitude = float(row['latitude'])
         longitude = float(row['longitude'])
         city_name = row['city_name']
@@ -140,26 +143,29 @@ def read_airports(reader):
 
         altitude = int(row['altitude'].strip())
 
-        if Airport.objects.filter(iata=iata).all().count() == 0:
-            city = get_city(city_name, latitude=latitude, longitude=longitude)
-            if city is None:
-                logger.warning(
-                    'Airport: {name}: Cannot find city: {city_name}.'.format(name=name, city_name=city_name))
+        city = get_city(city_name, latitude=latitude, longitude=longitude)
+        if city is None:
+            logger.warning(
+                'Airport: {name}: Cannot find city: {city_name}.'.format(name=name,
+                                                                         city_name=city_name))
 
-            country = get_country(country_name, city)
-            if country is None:
-                logger.warning(
-                    'Airport:  {name}: Cannot find country: {country_name}'.format(name=name,
+        country = get_country(country_name, city)
+        if country is None:
+            logger.warning(
+                'Airport:  {name}: Cannot find country: {country_name}'.format(name=name,
                                                                                    country_name=country_name))
 
-            airport = get_airport(longitude, latitude, name, iata, icao, altitude, city, country)
-            yield airport
+        airport = get_airport(airport_id, longitude, latitude, name, iata, icao, altitude, city,
+                              country)
+        yield airport
 
 
 class Command(BaseCommand):
     default_format = 'airport_id,name,city_name,country_name,iata,icao,latitude,longitude,altitude,timezone,dst'
 
-    help = """Imports airport data from CSV into DB, complementing it with country/city information"""
+    help = """Imports airport data from CSV into DB, complementing it with country/city information.
+    Second run will update the DB with the latest data.
+    """
 
     def handle(self, *args, **options):
         logger.info('Checking countries and cities')
@@ -172,7 +178,6 @@ class Command(BaseCommand):
 
         reader = csv.DictReader(lines, dialect='excel', fieldnames=columns)
 
-        # skipping firstline: is the header I'm overwriting
         for data in tqdm(read_airports(reader),
                          desc="Importing Airports"
                          ):
