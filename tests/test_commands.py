@@ -4,8 +4,8 @@ from cities.models import Country, City, AlternativeName
 from django.contrib.gis.geos import Point
 from django.test import TestCase
 
-from airports.management.commands.airports_import import get_city, get_country
-from airports.management.commands.airports_import import get_lines, read_airports
+from airports.management.commands.airports import get_city, get_country
+from airports.management.commands.airports import get_lines, read_airports
 from airports.models import Airport
 
 # python 2&3 compatible

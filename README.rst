@@ -44,7 +44,7 @@ Add it to your `INSTALLED_APPS`:
 Features
 --------
 
-The ```airports_import``` manage command has options, see ```airports_import --help``` output.
+The ```airports``` manage command has options, see ```airports --help``` output.
 Second run will update the DB with the latest data from the source csv file.
 
 Running Tests

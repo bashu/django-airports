@@ -15,7 +15,7 @@ from django.core.management.base import BaseCommand
 from django.db.models import Q
 from tqdm import tqdm
 
-from airports.models import Airport
+from ...models import Airport
 
 ENDPOINT_URL = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat"
 
@@ -49,6 +49,8 @@ def get_airport(airport_id, longitude, latitude, name, iata, icao, altitude, cit
 
     if icao == r'\N':
         icao = ''
+    if iata == r'\N':
+        iata = ''
     try:
         altitude = round(altitude * 0.3048, 2)
     except Exception:
@@ -98,34 +100,28 @@ def get_city(name, latitude, longitude):
     :return: None if something wrong.
     """
 
-    point = Point(latitude, longitude, srid=4326)
+    point = Point(longitude, latitude, srid=4326)
 
-    qs_all = City.objects.all()
+    qs_all_near = City.objects.all().annotate(distance=Distance('location', point)).filter(
+        distance__lte=MAX_DISTANCE_KM * 1000)
 
-    qs = qs_all.filter(name_std__iexact=name)
-    if qs.count() == 1:
+    qs = qs_all_near.filter(name_std__iexact=name).order_by('distance')
+    if qs.exists():
         return qs.first()
 
-    qs = qs_all.filter(Q(name__iexact=name) | Q(alt_names__name__iexact=name))
-    if qs.count() == 1:
+    qs = qs_all_near.filter(Q(name__iexact=name) | Q(alt_names__name__iexact=name)).order_by(
+        'distance')
+    if qs.exists():
         return qs.first()
 
-    qs = qs_all.all() \
-        .annotate(distance=Distance('location', point)) \
-        .filter(distance__lte=MAX_DISTANCE_KM * 1000) \
-        .order_by('distance').all()
-
-    if qs.count() >= 1:
-        return qs.first()
-    else:
-        return None
+    return qs_all_near.order_by('distance').first()
 
 
 def get_lines(download_url):
     # Streaming, so we can iterate over the response.
     req = requests.get(download_url, stream=True)
-    lines = codecs.iterdecode(req.iter_lines(), encoding='utf-8')
-    return lines
+    # lines = codecs.iterdecode(req.iter_lines(), encoding='utf-8')
+    return req.iter_lines()
 
 
 def read_airports(reader):
@@ -145,15 +141,11 @@ def read_airports(reader):
 
         city = get_city(city_name, latitude=latitude, longitude=longitude)
         if city is None:
-            logger.warning(
-                'Airport: {name}: Cannot find city: {city_name}.'.format(name=name,
-                                                                         city_name=city_name))
+            logger.warning('Airport: %s: Cannot find city: %s.', name, city_name)
 
         country = get_country(country_name, city)
         if country is None:
-            logger.warning(
-                'Airport:  {name}: Cannot find country: {country_name}'.format(name=name,
-                                                                                   country_name=country_name))
+            logger.warning('Airport: %s: Cannot find country: %s', name, country_name)
 
         airport = get_airport(airport_id, longitude, latitude, name, iata, icao, altitude, city,
                               country)
@@ -170,7 +162,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         logger.info('Checking countries and cities')
         if City.objects.all().count() == 0 or Country.objects.all().count() == 0:
-            call_command('cities', '--import', 'country,city')
+            call_command('cities', '--import', 'country,city,alt_name')
 
         columns = self.default_format.split(',')
 
