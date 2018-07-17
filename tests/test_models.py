@@ -28,6 +28,7 @@ class TestAirports(TestCase):
         pnt = Point(-6.081689834590001, 145.391998291, srid=4326)
 
         self.sut = Airport.objects.create(
+            airport_id=1,
             name="Goroka Airport",
             location=pnt,
             city=city,
@@ -36,6 +37,7 @@ class TestAirports(TestCase):
 
     def test_not_none(self):
         self.assertIsNotNone(self.sut)
+        self.assertIsNotNone(self.sut.airport_id)
         self.assertIsNotNone(self.sut.name)
         self.assertIsNotNone(self.sut.iata)
         self.assertIsNotNone(self.sut.icao)
