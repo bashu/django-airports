@@ -91,12 +91,12 @@ def get_country(name, city):
     return None
 
 
-def get_city(name, latitude, longitude):
+def get_city(name, longitude, latitude):
     """
 
     :param name:
-    :param latitude:
     :param longitude:
+    :param latitude:
     :return: None if something wrong.
     """
 
@@ -139,7 +139,7 @@ def read_airports(reader):
 
         altitude = int(row['altitude'].strip())
 
-        city = get_city(city_name, latitude=latitude, longitude=longitude)
+        city = get_city(city_name, longitude=longitude, latitude=latitude)
         if city is None:
             logger.warning('Airport: %s: Cannot find city: %s.', name, city_name)
 
