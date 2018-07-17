@@ -136,7 +136,8 @@ class TestCommandAirports2(TestCase):
         self.airport_region_name = 'Papua New Guinea'
 
     def test_get_city(self):
-        city = get_city('test', self.airport_location.coords[0], self.airport_location.coords[1])
+        city = get_city('test', longitude=self.airport_location.coords[0],
+                        latitude=self.airport_location.coords[1])
         self.assertIsNotNone(city)
 
     def test_get_country(self):
