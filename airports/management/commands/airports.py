@@ -2,9 +2,9 @@
 
 import codecs
 import csv
-import itertools
 import logging
 import os
+import sys
 
 import requests
 from cities.models import Country, City
@@ -120,8 +120,9 @@ def get_city(name, longitude, latitude):
 def get_lines(download_url):
     # Streaming, so we can iterate over the response.
     req = requests.get(download_url, stream=True)
-    # lines = codecs.iterdecode(req.iter_lines(), encoding='utf-8')
-    return req.iter_lines()
+    if sys.version_info.major == 2:  # different handling for Py2 vs Py3
+        return req.iter_lines()
+    return codecs.iterdecode(req.iter_lines(), encoding='utf-8')
 
 
 def read_airports(reader):
