@@ -23,7 +23,7 @@ class Airport(models.Model):
     airport_id = models.PositiveIntegerField(primary_key=True, editable=False)
 
     name = models.CharField(_("name"), max_length=100)
-    city_name = models.CharField(_("name"), max_length=100)
+    city_name = models.CharField(_("name"), null=True, blank=True, max_length=100)
 
     iata = models.CharField(_("IATA/FAA code"), null=True, blank=True, max_length=3,
                             validators=[MinLengthValidator(3)])
