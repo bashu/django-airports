@@ -38,7 +38,7 @@ class Airport(models.Model):
     country = models.ForeignKey('cities.Country', on_delete=models.DO_NOTHING, null=True)
     region = models.ForeignKey('cities.Region', on_delete=models.DO_NOTHING, null=True)
     city = models.ForeignKey('cities.City', on_delete=models.DO_NOTHING, null=True)
-    type = models.CharField(max_length=16)
+    type = models.CharField(max_length=16, default='')
 
     objects = GeoManager()
 
