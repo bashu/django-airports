@@ -7,7 +7,7 @@ test_django-airports
 
 Tests for `django-airports` models module.
 """
-from cities.models import Country, City
+from cities.models import Country, City, Region
 from django.contrib.gis.geos import Point
 from django.test import TestCase
 
@@ -17,10 +17,15 @@ from airports.models import Airport
 class TestAirports(TestCase):
     def setUp(self):
         country = Country.objects.create(population=0)
+        region = Region.objects.create(
+            name_std='region',
+            country=country
+        )
         city = City.objects.create(
             name='Goroka',
             name_std='Goroka',
             country=country,
+            region=region,
             location=Point(0, 0),
             population=0,
         )
@@ -32,6 +37,9 @@ class TestAirports(TestCase):
             name="Goroka Airport",
             location=pnt,
             city=city,
+            iata='XX88',
+            icao='XX88',
+            altitude=1000,
             country=country,
         )
 

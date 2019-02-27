@@ -53,6 +53,9 @@ class Command(BaseCommand):
             make_option('--flush', action='store_true', default=False,
                         help="Flush airports data."
                         ),
+            make_option('--force', action='store_true', default=False,
+                        help="Force update of existing airports."
+                        ),
         )
 
     def add_arguments(self, parser):
