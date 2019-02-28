@@ -11,7 +11,7 @@ django-airports
 .. image:: https://codecov.io/gh/bashu/django-airports/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/bashu/django-airports
 
-Provides airports' related models and data (from [OpenFlights](http://openflights.org/)) that can be used in  django projects, inspired by [django-cities](https://github.com/coderholic/django-cities)
+Provides airports' related models and data (from [OurAirports](http://ourairports.org/)) that can be used in  django projects, inspired by [django-cities](https://github.com/coderholic/django-cities)
 
 .. raw:: html
 

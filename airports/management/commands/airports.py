@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Download airports file from ourairports.org, and import to database
+Download airports file from ourairports.org, and import to database.
 The airports csv file fieldnames are these:
     fieldnames = (
         'id', 'ident', 'type', 'name', 'latitude_deg', 'longitude_deg',
@@ -9,6 +9,15 @@ The airports csv file fieldnames are these:
         'municipality', 'scheduled_service', 'gps_code', 'iata_code',
         'local_code', 'home_link', 'wikipedia_link', 'keywords',
     )
+
+To deal with region codes in different systems we are also downloading
+a file that we can use to correllate ISO-3166-2, Fips and GN region (aka
+administrative division) codes.
+This gives us a pretty good ability to correlate the airport regions with
+cities.Region objects.  Somewhat annoyingly, the geonames data uses a mix
+of ISO-3166-2 and Fips codes.  This is maninly a performance gain, since
+we can also derive the region from the city that we find using distance
+search.
 """
 
 import csv
@@ -41,20 +50,20 @@ MAX_DISTANCE_KM = 200
 
 APP_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..'))
 
-logger = logging.getLogger("airports")
+logger = logging.getLogger('airports')
 
 
 class Command(BaseCommand):
     data_dir = os.path.join(APP_DIR, 'data')
 
-    help = """Imports airport data from CSV into DB, complementing it with country/city information"""
+    help = 'Imports airport data from CSV into DB, complementing it with country/city information'
     if django.VERSION < (1, 8):
         option_list = BaseCommand.option_list + (
             make_option('--flush', action='store_true', default=False,
-                        help="Flush airports data."
+                        help='Flush airports data.'
                         ),
             make_option('--force', action='store_true', default=False,
-                        help="Force update of existing airports."
+                        help='Force update of existing airports.'
                         ),
         )
 
@@ -63,13 +72,13 @@ class Command(BaseCommand):
             '--flush',
             action='store_true',
             default=False,
-            help="Flush airports data."
+            help='Flush airports data.'
         )
         parser.add_argument(
             '--update',
             action='store_true',
             default=False,
-            help="Force update of existing airports."
+            help='Force update of existing airports.'
         )
 
     def handle(self, *args, **options):
@@ -82,18 +91,17 @@ class Command(BaseCommand):
         if self.options['flush'] is True:
             self.flush_airports()
         else:
-            #with open('{}/airports.dat'.format(self.data_dir), 'rt') as f:
             divisions_file  = self.download(DIVISIONS_URL, filename='divisions.dat')
             with open(divisions_file, 'rt') as f:
-                self.divisions = DivisionImporter(division_file=f,
-                        stdout=self.stdout,
-                        stderr=self.stderr).division_dict
+                importer = DivisionImporter(stdout=self.stdout, stderr=self.stderr)
+                self.divisions = importer.get_divisions(f)
 
             airport_file  = self.download(ENDPOINT_URL, filename='airports.dat')
             with open(airport_file, 'rt') as f:
                 self.stdout.flush()
                 try:
-                    importer = DataImporter(divisions=self.divisions,
+                    importer = DataImporter(
+                            divisions=self.divisions,
                             update=self.options['update'],
                             stdout=self.stdout,
                             stderr=self.stderr)
@@ -103,7 +111,7 @@ class Command(BaseCommand):
                 importer.start(f)
 
     def download(self, url, filename='airports.dat'):
-        logger.info("Downloading: " + filename)
+        logger.info('Downloading: ' + filename)
         response = requests.get(url, data={})
 
         if response.status_code != 200:
@@ -124,25 +132,28 @@ class Command(BaseCommand):
             raise CommandError('Can not open file: {0}'.format(e))
 
     def flush_airports(self):
-        logger.info("Flushing airports data")
+        logger.info('Flushing airports data')
         Airport.objects.all().delete()
 
 class DivisionImporter(object):
     def __init__(self, division_file=None, stdout=sys.stdout, stderr=sys.stderr):
         self.stdout = stdout
         self.stderr = stderr
-        self.division_dict = defaultdict(dict)
 
-        dialect = csv.Sniffer().sniff(division_file.read(1024))
-        division_file.seek(0)
-        reader = csv.DictReader(division_file, dialect=dialect)
+    def get_divisions(self, f):
+        division_dict = defaultdict(dict)
+        dialect = csv.Sniffer().sniff(f.read(1024))
+        f.seek(0)
+        reader = csv.DictReader(f, dialect=dialect)
 
-        for row in tqdm(list(reader), desc="Processing Divisions"):
+        for row in tqdm(list(reader), desc='Processing Divisions'):
             country_code = row['ISO-3166-1']
             region_code = row['ISO-3166-2']
             fips = row['Fips']
             GN = row['GN']
-            self.division_dict[country_code][region_code] = dict(fips=fips, GN=GN)
+            division_dict[country_code][region_code] = dict(fips=fips, GN=GN)
+
+        return division_dict
 
 class DataImporter(object):
     def __init__(self, divisions=None, update=False, stdout=sys.stdout, stderr=sys.stderr):
@@ -160,15 +171,13 @@ class DataImporter(object):
 
         reader = csv.DictReader(f, dialect=dialect)
 
-        for row in tqdm(list(reader), desc="Importing Airports"):
+        for row in tqdm(list(reader), desc='Importing Airports'):
             airport_id = row['id']
-            latitude = float(row['latitude_deg'])
             longitude = float(row['longitude_deg'])
+            latitude = float(row['latitude_deg'])
             city_name = row['municipality'] or None
             row_country_code = row['iso_country']
             country_code, region_code = regex_region.split(row['iso_region'].strip(), 1)
-            if not row_country_code == country_code:
-                raise CommandError('Country mismatch: {} != {}'.format(row_country_code, country_code))
 
             name = row['name'].strip() or None
             type = row['type'].strip() or None
@@ -181,7 +190,7 @@ class DataImporter(object):
 
             # Filter out ones we know we don't need, including SPAM entries.
             if ((latitude == 0 and longitude == 0) or
-                type == 'closed' or
+                #type == 'closed' or
                 country_code.startswith('ZZ') or
                 regex_delete.match(name)):
                 continue
@@ -191,7 +200,7 @@ class DataImporter(object):
                     country = Country.objects.get(code=country_code)
                 except Country.DoesNotExist:
                     # That's bad!  But still recoverable by reverse geocoding
-                    logger.error('Bad country_code: {} == {}'.format(row['iso_country'], country_code))
+                    logger.error('Bad country_code: {} == {}'.format(row_country_code, country_code))
                     country = None
 
                 # First try to find region by given region_code.  This is a lot faster
@@ -208,11 +217,11 @@ class DataImporter(object):
                         region = regions.first()
                     except (AssertionError, KeyError, Region.DoesNotExist):
                         # Unable to parse the region code, but may be able to figure it
-                        # out by finding out where the lat/lng is located...
+                        # out by using the coordinates.
                         logger.debug('Bad region_code: {}'.format(row['iso_region']))
                         region = None
 
-                country, region, city = get_location_info(city_name, country, region, latitude, longitude)
+                country, region, city = get_location_info(city_name, country, region, longitude, latitude)
 
                 if city is None:
                     logger.debug(
@@ -227,9 +236,9 @@ class DataImporter(object):
                     iata=iata,
                     icao=icao,
                     ident=ident,
-                    latitude=latitude,
                     local=local,
                     longitude=longitude,
+                    latitude=latitude,
                     name=name,
                     region=region,
                     type=type,
@@ -291,7 +300,7 @@ def create_airport(
             defaults=defaults
         )
         if created:
-            logger.debug("Added airport: %s", airport)
+            logger.debug('Added airport: {}'.format(airport))
         return airport
 
     except Exception as e:
@@ -302,15 +311,15 @@ def create_airport(
     return None
 
 
-def get_location_info(name, country, region, latitude, longitude):
+def get_location_info(name, country, region, longitude, latitude):
     """
     Get location info for an airport given incomplete information.
 
     :param name:
     :param country:
     :param region:
-    :param latitude:
     :param longitude:
+    :param latitude:
     :return: (country, region, city)
     """
 
@@ -335,6 +344,7 @@ def get_location_info(name, country, region, latitude, longitude):
     # If we didn't find the city by name, return the city in the same country/region
     # which is closest to the given lng/lat.
     point = Point(longitude, latitude, srid=4326)
+
     qs = filtered_cities \
         .annotate(distance=Distance('location', point)) \
         .filter(distance__lte=MAX_DISTANCE_KM * 1000) \
