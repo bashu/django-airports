@@ -40,7 +40,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 from tqdm import tqdm
 
-from airports.models import Airport
+from ...models import Airport
 
 ENDPOINT_URL = 'http://ourairports.com/data/airports.csv'
 DIVISIONS_URL = 'https://raw.githubusercontent.com/Tigrov/geoname-divisions/master/result/divisions.csv'
