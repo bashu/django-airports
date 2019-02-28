@@ -75,7 +75,7 @@ class Command(BaseCommand):
             help='Flush airports data.'
         )
         parser.add_argument(
-            '--update',
+            '--force',
             action='store_true',
             default=False,
             help='Force update of existing airports.'
