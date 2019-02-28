@@ -102,11 +102,11 @@ class Command(BaseCommand):
                 try:
                     importer = DataImporter(
                             divisions=self.divisions,
-                            update=self.options['update'],
+                            force=self.options['force'],
                             stdout=self.stdout,
                             stderr=self.stderr)
-                except Exception:
-                    raise CommandError('Can not continue processing')
+                except Exception as e:
+                    raise CommandError('Can not continue processing: {}'.format(e))
 
                 importer.start(f)
 
@@ -156,11 +156,11 @@ class DivisionImporter(object):
         return division_dict
 
 class DataImporter(object):
-    def __init__(self, divisions=None, update=False, stdout=sys.stdout, stderr=sys.stderr):
+    def __init__(self, divisions=None, force=False, stdout=sys.stdout, stderr=sys.stderr):
         self.stdout = stdout
         self.stderr = stderr
         self.divisions = divisions
-        self.update = update
+        self.force = force
 
     def start(self, f):
         regex_delete = re.compile(r'(^delete|deleted|\[DELETE\])', re.IGNORECASE)
@@ -195,7 +195,7 @@ class DataImporter(object):
                 regex_delete.match(name)):
                 continue
 
-            if not Airport.objects.filter(airport_id=airport_id).exists() or self.update:
+            if not Airport.objects.filter(airport_id=airport_id).exists() or self.force:
                 try:
                     country = Country.objects.get(code=country_code)
                 except Country.DoesNotExist:
