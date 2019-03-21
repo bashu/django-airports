@@ -172,7 +172,7 @@ class DataImporter(object):
         reader = csv.DictReader(f, dialect=dialect)
 
         for row in tqdm(list(reader), desc='Importing Airports'):
-            airport_id = row['id']
+            id = row['id']
             longitude = float(row['longitude_deg'])
             latitude = float(row['latitude_deg'])
             city_name = row['municipality'] or None
@@ -195,7 +195,7 @@ class DataImporter(object):
                 regex_delete.match(name)):
                 continue
 
-            if not Airport.objects.filter(airport_id=airport_id).exists() or self.force:
+            if not Airport.objects.filter(id=id).exists() or self.force:
                 try:
                     country = Country.objects.get(code=country_code)
                 except Country.DoesNotExist:
@@ -228,7 +228,7 @@ class DataImporter(object):
                         'Airport: {name}: Cannot find city: {city_name}.'.format(name=name, city_name=city_name))
 
                 airport = create_airport(
-                    airport_id=airport_id,
+                    id=id,
                     altitude=altitude,
                     city=city,
                     city_name=city_name,
@@ -245,7 +245,7 @@ class DataImporter(object):
                 )
 
 def create_airport(
-        airport_id=None, type=None, altitude=None,
+        id=None, type=None, altitude=None,
         name=None, city=None, city_name=None, region=None, country=None,
         iata=None, icao=None, ident=None, local=None,
         latitude=None, longitude=None,
@@ -254,7 +254,7 @@ def create_airport(
     """
     Get or create an Airport.
 
-    :param airport_id:
+    :param id:
     :param type:
     :param longitude:
     :param latitude:
@@ -296,7 +296,7 @@ def create_airport(
 
     try:
         airport, created = Airport.objects.update_or_create(
-            airport_id=airport_id,
+            id=id,
             defaults=defaults
         )
         if created:
@@ -305,7 +305,7 @@ def create_airport(
 
     except Exception as e:
         logger.error('{}: id={}\n{}'.format(
-            e, airport_id, pprint.pformat(defaults))
+            e, id, pprint.pformat(defaults))
         )
 
     return None

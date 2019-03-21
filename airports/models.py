@@ -20,8 +20,6 @@ else:
 
 @python_2_unicode_compatible
 class Airport(models.Model):
-    airport_id = models.PositiveIntegerField(primary_key=True, editable=False)
-
     name = models.CharField(_("name"), max_length=100)
     city_name = models.CharField(_("name"), null=True, blank=True, max_length=100)
 
@@ -43,7 +41,7 @@ class Airport(models.Model):
     objects = GeoManager()
 
     class Meta:  # pylint: disable=C1001
-        ordering = ['airport_id']
+        ordering = ['id']
 
     def __str__(self):
         return force_text(self.name)
