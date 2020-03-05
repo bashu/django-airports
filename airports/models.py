@@ -6,7 +6,10 @@ try:
     from django.utils.encoding import force_unicode as force_text
 except (NameError, ImportError):
     from django.utils.encoding import force_text
-from django.utils.encoding import python_2_unicode_compatible
+try:
+    from django.utils.encoding import python_2_unicode_compatible
+except (NameError, ImportError):
+    from six import python_2_unicode_compatible
 from django.core.validators import MinLengthValidator
 from django.utils.translation import gettext_lazy as _
 
