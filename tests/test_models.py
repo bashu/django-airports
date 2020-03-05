@@ -53,7 +53,7 @@ class TestAirports(TestCase):
                 timezone='America/Los_Angeles',
             )
         self.city.save()
-        self.airport_id = 8227
+        self.id = 8227
         self.airport_defaults = dict(
                 name='On the Rocks Airport',
                 city_name='Alpine',
@@ -75,7 +75,7 @@ class TestAirports(TestCase):
         self.assertIsNotNone(country)
         self.assertIsNotNone(region)
         self.assertIsNotNone(city)
-        airport = create_airport(airport_id=self.airport_id, **self.airport_defaults)
+        airport = create_airport(id=self.id, **self.airport_defaults)
         self.assertIsNotNone(airport)
 
     def test_create_airport_no_name(self):
@@ -85,7 +85,7 @@ class TestAirports(TestCase):
         self.assertIsNotNone(city)
         defaults = self.airport_defaults
         defaults['name'] = ''
-        airport = create_airport(airport_id=self.airport_id, **defaults)
+        airport = create_airport(id=self.id, **defaults)
         self.assertIsNotNone(airport)
         self.assertEqual(airport.name, 'Alpine')
 
@@ -97,7 +97,7 @@ class TestAirports(TestCase):
         defaults = self.airport_defaults
         defaults['name'] = ''
         defaults['city_name'] = ''
-        airport = create_airport(airport_id=self.airport_id, **defaults)
+        airport = create_airport(id=self.id, **defaults)
         self.assertIsNotNone(airport)
         self.assertEqual(airport.name, 'Alpine')
 
@@ -120,7 +120,7 @@ class TestAirports1(TestCase):
         pnt = Point(-6.081689834590001, 145.391998291, srid=4326)
 
         self.sut = Airport.objects.create(
-            airport_id=1,
+            id=1,
             name="Goroka Airport",
             location=pnt,
             city=city,
@@ -132,7 +132,7 @@ class TestAirports1(TestCase):
 
     def test_not_none(self):
         self.assertIsNotNone(self.sut)
-        self.assertIsNotNone(self.sut.airport_id)
+        self.assertIsNotNone(self.sut.id)
         self.assertIsNotNone(self.sut.name)
         self.assertIsNotNone(self.sut.iata)
         self.assertIsNotNone(self.sut.icao)

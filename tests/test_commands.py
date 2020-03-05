@@ -46,7 +46,7 @@ class TestCommandAirports(TestCase):
             )
         self.city.save()
         self.airport = Airport(
-                airport_id=8227,
+                id=8227,
                 name='On the Rocks Airport',
                 city_name='Alpine',
                 iata=None,
