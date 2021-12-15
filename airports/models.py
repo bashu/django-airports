@@ -6,7 +6,10 @@ try:
     from django.utils.encoding import force_unicode as force_text
 except (NameError, ImportError):
     from django.utils.encoding import force_text
-from django.utils.encoding import python_2_unicode_compatible
+try:
+    from django.utils.encoding import python_2_unicode_compatible
+except (NameError, ImportError):
+    from six import python_2_unicode_compatible
 from django.core.validators import MinLengthValidator
 from django.utils.translation import gettext_lazy as _
 
@@ -20,8 +23,6 @@ else:
 
 @python_2_unicode_compatible
 class Airport(models.Model):
-    airport_id = models.PositiveIntegerField(primary_key=True, editable=False)
-
     name = models.CharField(_("name"), max_length=100)
     city_name = models.CharField(_("name"), null=True, blank=True, max_length=100)
 
@@ -43,7 +44,7 @@ class Airport(models.Model):
     objects = GeoManager()
 
     class Meta:  # pylint: disable=C1001
-        ordering = ['airport_id']
+        ordering = ['id']
 
     def __str__(self):
         return force_text(self.name)

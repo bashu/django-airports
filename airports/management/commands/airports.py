@@ -15,7 +15,7 @@ a file that we can use to correllate ISO-3166-2, Fips and GN region (aka
 administrative division) codes.
 This gives us a pretty good ability to correlate the airport regions with
 cities.Region objects.  Somewhat annoyingly, the geonames data uses a mix
-of ISO-3166-2 and Fips codes.  This is maninly a performance gain, since
+of ISO-3166-2 and Fips codes.  This is mainly a performance gain, since
 we can also derive the region from the city that we find using distance
 search.
 """
@@ -91,13 +91,13 @@ class Command(BaseCommand):
         if self.options['flush'] is True:
             self.flush_airports()
         else:
-            divisions_file  = self.download(DIVISIONS_URL, filename='divisions.dat')
+            divisions_file = self.download(DIVISIONS_URL, filename='divisions.dat')
             with open(divisions_file, 'rt') as f:
                 importer = DivisionImporter(stdout=self.stdout, stderr=self.stderr)
                 self.divisions = importer.get_divisions(f)
 
             airport_file  = self.download(ENDPOINT_URL, filename='airports.dat')
-            with open(airport_file, 'rt') as f:
+            with open(airport_file, 'rt', encoding='utf-8') as f:
                 self.stdout.flush()
                 try:
                     importer = DataImporter(
@@ -117,13 +117,17 @@ class Command(BaseCommand):
         if response.status_code != 200:
             response.raise_for_status()
 
+        # The requests module guesses the encoding, and in this case it
+        # is guessing wrong, so we force it to utf-8.
+        response.encoding = 'utf-8'
+
         try:
             filepath = os.path.join(self.data_dir, filename)
             if not os.path.exists(self.data_dir):
                 os.makedirs(self.data_dir)
 
-            fobj = open(filepath, 'wb')
-            fobj.write(response.text.encode('utf-8'))
+            fobj = open(filepath, 'wt')
+            fobj.write(response.text)
             fobj.close()
 
             return filepath
@@ -164,6 +168,7 @@ class DataImporter(object):
 
     def start(self, f):
         regex_delete = re.compile(r'(^delete|deleted|\[DELETE\])', re.IGNORECASE)
+        regex_ring = re.compile(r'Powerful Magic Ring', re.IGNORECASE)
         regex_region = re.compile(r'[-/]')
 
         dialect = csv.Sniffer().sniff(f.read(1024))
@@ -172,7 +177,7 @@ class DataImporter(object):
         reader = csv.DictReader(f, dialect=dialect)
 
         for row in tqdm(list(reader), desc='Importing Airports'):
-            airport_id = row['id']
+            id = row['id']
             longitude = float(row['longitude_deg'])
             latitude = float(row['latitude_deg'])
             city_name = row['municipality'] or None
@@ -192,10 +197,11 @@ class DataImporter(object):
             if ((latitude == 0 and longitude == 0) or
                 #type == 'closed' or
                 country_code.startswith('ZZ') or
+                regex_ring.search(name) or
                 regex_delete.match(name)):
                 continue
 
-            if not Airport.objects.filter(airport_id=airport_id).exists() or self.force:
+            if not Airport.objects.filter(id=id).exists() or self.force:
                 try:
                     country = Country.objects.get(code=country_code)
                 except Country.DoesNotExist:
@@ -228,7 +234,7 @@ class DataImporter(object):
                         'Airport: {name}: Cannot find city: {city_name}.'.format(name=name, city_name=city_name))
 
                 airport = create_airport(
-                    airport_id=airport_id,
+                    id=id,
                     altitude=altitude,
                     city=city,
                     city_name=city_name,
@@ -245,7 +251,7 @@ class DataImporter(object):
                 )
 
 def create_airport(
-        airport_id=None, type=None, altitude=None,
+        id=None, type=None, altitude=None,
         name=None, city=None, city_name=None, region=None, country=None,
         iata=None, icao=None, ident=None, local=None,
         latitude=None, longitude=None,
@@ -254,7 +260,7 @@ def create_airport(
     """
     Get or create an Airport.
 
-    :param airport_id:
+    :param id:
     :param type:
     :param longitude:
     :param latitude:
@@ -270,11 +276,13 @@ def create_airport(
     :param country:
     :return:
     """
+
     location = Point(longitude, latitude, srid=4326)
 
     name = name or city_name or getattr(city, 'name', 'UNKNOWN')
 
     try:
+        # Convert altitude to meters
         altitude = round(altitude * 0.3048, 2)
     except TypeError:
         altitude = 0.0
@@ -296,7 +304,7 @@ def create_airport(
 
     try:
         airport, created = Airport.objects.update_or_create(
-            airport_id=airport_id,
+            id=id,
             defaults=defaults
         )
         if created:
@@ -305,7 +313,7 @@ def create_airport(
 
     except Exception as e:
         logger.error('{}: id={}\n{}'.format(
-            e, airport_id, pprint.pformat(defaults))
+            e, id, pprint.pformat(defaults))
         )
 
     return None
