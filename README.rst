@@ -5,13 +5,19 @@ django-airports
 .. image:: https://badge.fury.io/py/django-airports.svg
     :target: https://badge.fury.io/py/django-airports
 
-.. image:: https://travis-ci.org/eracle/django-airports.svg?branch=master
-    :target: https://travis-ci.org/eracle/django-airports
+.. image:: https://travis-ci.org/bashu/django-airports.svg?branch=master
+    :target: https://travis-ci.org/bashu/django-airports
 
-.. image:: https://codecov.io/gh/eracle/django-airports/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/eracle/django-airports
+.. image:: https://codecov.io/gh/bashu/django-airports/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/bashu/django-airports
 
-Provides airports' related models and data (from [OpenFlights](http://openflights.org/)) that can be used in  django projects, inspired by [django-cities](https://github.com/coderholic/django-cities)
+Provides airports' related models and data (from [OurAirports](http://ourairports.org/)) that can be used in  django projects, inspired by [django-cities](https://github.com/coderholic/django-cities)
+
+.. raw:: html
+
+   <p align="center">
+     <img src="https://raw.githubusercontent.com/bashu/django-airports/develop/airports/static/img/logo/horizontal.png" alt="django-airports">
+   </p>
 
 Documentation
 -------------
