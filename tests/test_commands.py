@@ -5,6 +5,60 @@ from django.test import TestCase
 from airports.management.commands.airports import get_location_info, create_airport
 from airports.models import Airport
 
+# python 2&3 compatible
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
+
+
+class TestCommandAirports3(TestCase):
+    def setUp(self):
+        default_format = 'airport_id,name,city_name,country_name,iata,icao,latitude,longitude,altitude,timezone,dst'
+
+        twolines = """1,"Goroka Airport","Goroka","Papua New Guinea","GKA","AYGA",-6.081689834590001,145.391998291,5282,10,"U","Pacific/Port_Moresby","airport","OurAirports"
+        2,"Madang Airport","Madang","Papua New Guinea","MAG","AYMD",-5.20707988739,145.789001465,20,10,"U","Pacific/Port_Moresby","airport","OurAirports" """
+
+        self.columns = default_format.split(',')
+        self.csv = StringIO(twolines)
+
+        self.dialect = csv.Sniffer().sniff(self.csv.read(512))
+
+        self.csv.seek(0)
+        self.reader = csv.DictReader(self.csv, dialect=self.dialect, fieldnames=self.columns)
+
+        self.url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat"
+
+    def test_get_lines(self):
+        lines = get_lines(self.url)
+
+        self.assertTrue(len(next(lines)) > 10)
+        self.assertTrue(len(next(lines)) > 10)
+        self.assertTrue(len(next(lines)) > 10)
+
+    def test_read_airports(self):
+        airports = list(read_airports(self.reader))
+        self.assertEquals(len(airports), 2)
+
+    def test_airports_updated(self):
+        # read them in first
+        list(read_airports(self.reader))
+
+        self.assertEquals(Airport.objects.count(), 2)
+        self.assertEqual(Airport.objects.get(airport_id=1).name, "Goroka Airport")
+        self.assertEqual(Airport.objects.get(airport_id=2).name, "Madang Airport")
+
+        # update the airports
+        csv_text = StringIO("""1,"Goro White Dog Airport","Goroka","Papua New Guinea","GKA","AYGA",-6.081689834590001,145.391998291,5282,10,"U","Pacific/Port_Moresby","airport","OurAirports"
+        2,"Vabank Airport","Madang","Papua New Guinea","MAG","AYMD",-5.20707988739,145.789001465,20,10,"U","Pacific/Port_Moresby","airport","OurAirports" """)
+        reader = csv.DictReader(csv_text, dialect=self.dialect, fieldnames=self.columns)
+
+        list(read_airports(reader))
+
+        self.assertEquals(Airport.objects.count(), 2)
+        self.assertEqual(Airport.objects.get(airport_id=1).name, "Goro White Dog Airport")
+        self.assertEqual(Airport.objects.get(airport_id=2).name, "Vabank Airport")
+
 
 class TestCommandAirports(TestCase):
     def setUp(self):
