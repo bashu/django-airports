@@ -19,7 +19,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "t^6&r%=)&p03ec86guhi=1cabd^u%@u8%i_ywb9rwt9ig77$cg"
+SECRET_KEY = "YOUR_SECRET_KEY"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -27,6 +27,10 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 # Application definition
+
+PROJECT_APPS = [
+    "airports",
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -37,20 +41,20 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'cities',
-    'airports',
     'django.contrib.gis',
     # if your app has other dependencies that need to be added to the site
     # they should be added here
-]
+] + PROJECT_APPS
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'django.middleware.security.SecurityMiddleware',
 ]
 
 ROOT_URLCONF = 'example.urls'
@@ -71,35 +75,13 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'example.wsgi.application'
-
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
-SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.spatialite',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
 
-# Password validation
-# https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
+import dj_database_url
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+DATABASES = {"default": dj_database_url.config(default=os.environ.get("DATABASE_URL", "postgis://postgres@db:5432/postgres"))}
+DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
@@ -115,6 +97,22 @@ USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.9/howto/static-files/
+# https://docs.djangoproject.com/en/1.8/howto/static-files/
 
-STATIC_URL = '/static/'
+# Absolute filesystem path to the directory that will hold user-uploaded files.
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+# URL that handles the media served from MEDIA_ROOT. Make sure to use a
+# trailing slash.
+MEDIA_URL = "/media/"
+
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+STATIC_URL = "/static/"
+
+# django-cities
+
+CITIES_DATA_DIR = '/app/tmp'
+
+# Limit Imported Postal Codes
+CITIES_POSTAL_CODES = ['FR', 'DE']
