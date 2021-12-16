@@ -2,14 +2,17 @@
 django-airports
 =============================
 
-.. image:: https://badge.fury.io/py/django-airports.svg
-    :target: https://badge.fury.io/py/django-airports
+.. image:: https://img.shields.io/pypi/v/django-airports.svg
+    :target: https://pypi.python.org/pypi/django-airports/
 
-.. image:: https://travis-ci.org/bashu/django-airports.svg?branch=master
-    :target: https://travis-ci.org/bashu/django-airports
+.. image:: https://img.shields.io/pypi/dm/django-airports.svg
+    :target: https://pypi.python.org/pypi/django-airports/
 
-.. image:: https://codecov.io/gh/bashu/django-airports/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/bashu/django-airports
+.. image:: https://img.shields.io/github/license/bashu/django-airports.svg
+    :target: https://pypi.python.org/pypi/django-airports/
+
+.. image:: https://app.travis-ci.com/bashu/django-airports.svg?branch=develop
+    :target: https://app.travis-ci.com/bashu/django-airports
 
 Provides airports' related models and data (from [OurAirports](http://ourairports.org/)) that can be used in  django projects, inspired by [django-cities](https://github.com/coderholic/django-cities)
 
