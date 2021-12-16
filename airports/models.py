@@ -1,27 +1,11 @@
-# -*- coding: utf-8 -*-
-
 from django.contrib.gis.db import models
 
-try:
-    from django.utils.encoding import force_unicode as force_text
-except (NameError, ImportError):
-    from django.utils.encoding import force_text
-try:
-    from django.utils.encoding import python_2_unicode_compatible
-except (NameError, ImportError):
-    from six import python_2_unicode_compatible
+from django.utils.encoding import force_str
 from django.core.validators import MinLengthValidator
 from django.utils.translation import gettext_lazy as _
-
-from .conf import DJANGO_VERSION
-
-if DJANGO_VERSION < 2:
-    from django.contrib.gis.db.models import GeoManager
-else:
-    from django.db.models import Manager as GeoManager
+from django.db.models import Manager as GeoManager
 
 
-@python_2_unicode_compatible
 class Airport(models.Model):
     name = models.CharField(_("name"), max_length=100)
     city_name = models.CharField(_("name"), null=True, blank=True, max_length=100)
@@ -47,4 +31,4 @@ class Airport(models.Model):
         ordering = ['id']
 
     def __str__(self):
-        return force_text(self.name)
+        return force_str(self.name)

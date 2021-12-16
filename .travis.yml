@@ -5,9 +5,10 @@ cache: pip
 sudo: false
 
 python:
-  - "3.4"
-  - "3.5"
   - "3.6"
+  - "3.7"
+  - "3.8"
+  - "3.9"
 
 addons:
   apt:
@@ -21,9 +22,12 @@ addons:
       - python3-dev
       - libsqlite3-mod-spatialite
 
+before_install:
+  - python3 -m pip install --upgrade --no-cache-dir setuptools==57.5.0
+
 install:
   # install python gdal package (version must match installed GDAL lib)
-  - CFLAGS=-I/usr/include/gdal pip install GDAL==$(gdal-config --version | cut -d. -f1-2).*
+  - CPLUS_INCLUDE_PATH=/usr/include/gdal C_INCLUDE_PATH=/usr/include/gdal CFLAGS=-I/usr/include/gdal pip install GDAL==2.2.4
 
   # other dependencies
   - pip install tox-travis

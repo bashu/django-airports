@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Download airports file from ourairports.org, and import to database.
 The airports csv file fieldnames are these:
@@ -92,12 +90,12 @@ class Command(BaseCommand):
             self.flush_airports()
         else:
             divisions_file = self.download(DIVISIONS_URL, filename='divisions.dat')
-            with open(divisions_file, 'rt') as f:
+            with open(divisions_file) as f:
                 importer = DivisionImporter(stdout=self.stdout, stderr=self.stderr)
                 self.divisions = importer.get_divisions(f)
 
             airport_file  = self.download(ENDPOINT_URL, filename='airports.dat')
-            with open(airport_file, 'rt', encoding='utf-8') as f:
+            with open(airport_file, encoding='utf-8') as f:
                 self.stdout.flush()
                 try:
                     importer = DataImporter(
@@ -106,7 +104,7 @@ class Command(BaseCommand):
                             stdout=self.stdout,
                             stderr=self.stderr)
                 except Exception as e:
-                    raise CommandError('Can not continue processing: {}'.format(e))
+                    raise CommandError(f'Can not continue processing: {e}')
 
                 importer.start(f)
 
@@ -132,14 +130,14 @@ class Command(BaseCommand):
 
             return filepath
 
-        except IOError as e:
-            raise CommandError('Can not open file: {0}'.format(e))
+        except OSError as e:
+            raise CommandError(f'Can not open file: {e}')
 
     def flush_airports(self):
         logger.info('Flushing airports data')
         Airport.objects.all().delete()
 
-class DivisionImporter(object):
+class DivisionImporter:
     def __init__(self, division_file=None, stdout=sys.stdout, stderr=sys.stderr):
         self.stdout = stdout
         self.stderr = stderr
@@ -159,7 +157,7 @@ class DivisionImporter(object):
 
         return division_dict
 
-class DataImporter(object):
+class DataImporter:
     def __init__(self, divisions=None, force=False, stdout=sys.stdout, stderr=sys.stderr):
         self.stdout = stdout
         self.stderr = stderr
@@ -206,7 +204,7 @@ class DataImporter(object):
                     country = Country.objects.get(code=country_code)
                 except Country.DoesNotExist:
                     # That's bad!  But still recoverable by reverse geocoding
-                    logger.error('Bad country_code: {} == {}'.format(row_country_code, country_code))
+                    logger.error(f'Bad country_code: {row_country_code} == {country_code}')
                     country = None
 
                 # First try to find region by given region_code.  This is a lot faster
@@ -231,7 +229,7 @@ class DataImporter(object):
 
                 if city is None:
                     logger.debug(
-                        'Airport: {name}: Cannot find city: {city_name}.'.format(name=name, city_name=city_name))
+                        f'Airport: {name}: Cannot find city: {city_name}.')
 
                 airport = create_airport(
                     id=id,
@@ -308,7 +306,7 @@ def create_airport(
             defaults=defaults
         )
         if created:
-            logger.debug('Added airport: {}'.format(airport))
+            logger.debug(f'Added airport: {airport}')
         return airport
 
     except Exception as e:
