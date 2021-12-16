@@ -6,17 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('airports', '0002_auto_20190225_0210'),
+        ("airports", "0002_auto_20190225_0210"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='airport',
-            options={'ordering': ['id']},
+            name="airport",
+            options={"ordering": ["id"]},
         ),
         migrations.RenameField(
-            model_name='airport',
-            old_name='airport_id',
-            new_name='id',
+            model_name="airport",
+            old_name="airport_id",
+            new_name="id",
         ),
     ]

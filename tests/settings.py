@@ -1,6 +1,5 @@
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-import re
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -20,7 +19,7 @@ INSTALLED_APPS = [
     "cities",
 ] + PROJECT_APPS
 
-SPATIALITE_LIBRARY_PATH = os.getenv('SPATIALITE_LIBRARY_PATH', 'mod_spatialite')
+SPATIALITE_LIBRARY_PATH = os.getenv("SPATIALITE_LIBRARY_PATH", "mod_spatialite")
 
 TEMPLATES = [
     {
@@ -51,4 +50,3 @@ DATABASES = {"default": {"ENGINE": "django.contrib.gis.db.backends.spatialite", 
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = "/static/"
-
