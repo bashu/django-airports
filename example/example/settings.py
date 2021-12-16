@@ -39,11 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    'cities',
     'django.contrib.gis',
     # if your app has other dependencies that need to be added to the site
     # they should be added here
+    'cities',
 ] + PROJECT_APPS
 
 MIDDLEWARE = [
@@ -113,6 +112,4 @@ STATIC_URL = "/static/"
 # django-cities
 
 CITIES_DATA_DIR = '/app/tmp'
-
-# Limit Imported Postal Codes
 CITIES_POSTAL_CODES = ['FR', 'DE']

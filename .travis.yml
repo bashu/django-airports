@@ -1,26 +1,32 @@
 # Config file for automatic testing at travis-ci.org
-
+dist: xenial
 language: python
+cache: pip
+sudo: false
 
 python:
   - "3.4"
   - "3.5"
   - "3.6"
 
-env:
-  - DJANGO=2.0
-
-# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y spatialite-bin binutils libproj-dev gdal-bin
+addons:
+  apt:
+    sources:
+      - sourceline: ppa:ubuntugis/ppa
+    packages:
+      - gdal-bin
+      - libgdal-dev
+      - libproj-dev
+      - spatialite-bin
+      - python3-dev
+      - libsqlite3-mod-spatialite
 
 install:
+  # install python gdal package (version must match installed GDAL lib)
+  - CFLAGS=-I/usr/include/gdal pip install GDAL==$(gdal-config --version | cut -d. -f1-2).*
+
+  # other dependencies
   - pip install tox-travis
-  - pip install -r requirements_test.txt
 
-# command to run tests using coverage, e.g. python setup.py test
-script: tox
-
-after_success:
-  - codecov -e DJANGO
+script:
+  - tox

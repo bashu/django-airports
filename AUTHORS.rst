@@ -1,11 +1,7 @@
-=======
-Credits
+Authors
 =======
 
-Development Lead
-----------------
-
-* Basil Shubin - bashu <basil.shubin@gmail.com>
+* Basil Shubin <basil.shubin@gmail.com>
 * Antonio Ercole De Luca <eracle@posteo.eu>
 
 Contributors

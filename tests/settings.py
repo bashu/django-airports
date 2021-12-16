@@ -1,43 +1,54 @@
-# -*- coding: utf-8
-from __future__ import unicode_literals, absolute_import
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import os
+import re
 
-import distro
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-import django
+SECRET_KEY = "DUMMY_SECRET_KEY"
 
-DEBUG = True
-USE_TZ = True
+INTERNAL_IPS = []
 
-SPATIALITE_LIBRARY_PATH = 'mod_spatialite.so'
+# Application definition
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "!2*nm%ps%x8!ykyb^s9+!l1vcmeh+(f&de%br=js*7(5i_rmet"
-
-# needed since travis uses Ubuntu 14.04
-if distro.linux_distribution() == ('Ubuntu', '16.04', 'Xenial Xerus') or \
-    distro.linux_distribution() == (u'Linux Mint', u'18.3', u'Sylvia'):
-    SPATIALITE_LIBRARY_PATH = 'mod_spatialite'
-
-DATABASES = {
-    "default": {
-        "ENGINE": 'django.contrib.gis.db.backends.spatialite',
-        "NAME": ":memory:",
-    }
-}
-
-ROOT_URLCONF = "tests.urls"
+PROJECT_APPS = ["tests", "airports"]
 
 INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    "django.contrib.sites",
-    'cities',
-    "airports",
+    "django.contrib.staticfiles",
+    "django.contrib.gis",
+    "cities",
+] + PROJECT_APPS
+
+SPATIALITE_LIBRARY_PATH = os.getenv('SPATIALITE_LIBRARY_PATH', 'mod_spatialite')
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.contrib.auth.context_processors.auth",
+                "django.template.context_processors.debug",
+                "django.template.context_processors.i18n",
+                "django.template.context_processors.media",
+                "django.template.context_processors.request",
+                "django.template.context_processors.static",
+                "django.template.context_processors.tz",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
 ]
 
-SITE_ID = 1
+# Database
+# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
-if django.VERSION >= (1, 10):
-    MIDDLEWARE = ()
-else:
-    MIDDLEWARE_CLASSES = ()
+DATABASES = {"default": {"ENGINE": "django.contrib.gis.db.backends.spatialite", "NAME": ":memory:"}}
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.8/howto/static-files/
+
+STATIC_URL = "/static/"
+

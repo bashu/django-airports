@@ -2,11 +2,10 @@ from cities.models import Country, City, Region
 from django.contrib.gis.geos import Point
 from django.test import TestCase
 
-from airports.models import Airport
 from airports.management.commands.airports import get_location_info, create_airport
+from airports.models import Airport
 
-
-class AirportTests(TestCase):
+class ManagementCommandTests(TestCase):
     def setUp(self):
         self.country = Country(
                 slug='United-States',
@@ -45,8 +44,8 @@ class AirportTests(TestCase):
                 timezone='America/Los_Angeles',
             )
         self.city.save()
-        self.id = 8227
-        self.airport_defaults = dict(
+        self.airport = Airport(
+                id=8227,
                 name='On the Rocks Airport',
                 city_name='Alpine',
                 iata=None,
@@ -54,41 +53,51 @@ class AirportTests(TestCase):
                 local='1CA6',
                 ident='1CA6',
                 altitude=0.0,
-                longitude=-116.7229995727539,
-                latitude=32.76509857177734,
+                location=Point(-116.7229995727539,32.76509857177734),
                 country=self.country,
                 region=self.region,
                 city=self.city,
                 type='small_airport'
             )
+        self.airport.save()
 
-    def test_create_airport(self):
+    def assert_location_tuple(self, country, region, city):
+        self.assertEqual(country, self.country)
+        self.assertEqual(region, self.region)
+        self.assertEqual(city, self.city)
+
+    def test_get_location_info_name(self):
         country, region, city = get_location_info('Alpine', None, None, -116.7229995727539, 32.76509857177734)
-        self.assertIsNotNone(country)
-        self.assertIsNotNone(region)
-        self.assertIsNotNone(city)
-        airport = create_airport(id=self.id, **self.airport_defaults)
-        self.assertIsNotNone(airport)
+        self.assert_location_tuple(country, region, city)
 
-    def test_create_airport_no_name(self):
-        country, region, city = get_location_info('', None, None, -116.7229995727539, 32.76509857177734)
-        self.assertIsNotNone(country)
-        self.assertIsNotNone(region)
-        self.assertIsNotNone(city)
-        defaults = self.airport_defaults
-        defaults['name'] = ''
-        airport = create_airport(id=self.id, **defaults)
-        self.assertIsNotNone(airport)
-        self.assertEqual(airport.name, 'Alpine')
+    def test_get_location_info_wrong_name(self):
+        country, region, city = get_location_info('Wrong Name', None, None, -116.7229995727539, 32.76509857177734)
+        self.assert_location_tuple(country, region, city)
 
-    def test_create_airport_no_city_name(self):
+    def test_get_location_info_fix_name(self):
         country, region, city = get_location_info('', None, None, -116.7229995727539, 32.76509857177734)
-        self.assertIsNotNone(country)
-        self.assertIsNotNone(region)
-        self.assertIsNotNone(city)
-        defaults = self.airport_defaults
-        defaults['name'] = ''
-        defaults['city_name'] = ''
-        airport = create_airport(id=self.id, **defaults)
-        self.assertIsNotNone(airport)
-        self.assertEqual(airport.name, 'Alpine')
+        self.assert_location_tuple(country, region, city)
+
+    def test_get_location_info_missing_name(self):
+        country, region, city = get_location_info('', None, None, -116.7229995727539, 32.76509857177734)
+        self.assert_location_tuple(country, region, city)
+
+    def test_get_location_info_country(self):
+        country, region, city = get_location_info('', self.country, None, -116.7229995727539, 32.76509857177734)
+        self.assert_location_tuple(country, region, city)
+
+    def test_get_location_info_country_region(self):
+        country, region, city = get_location_info('', self.country, self.region, -116.7229995727539, 32.76509857177734)
+        self.assert_location_tuple(country, region, city)
+
+    def test_get_location_info_country_region_bad_coords(self):
+        country, region, city = get_location_info('', self.country, self.region, -116.7, 38.0)
+        self.assertEqual(country, self.country)
+        self.assertEqual(region, self.region)
+        self.assertIsNone(city)
+
+    def test_get_location_info_country_bad_coords(self):
+        country, region, city = get_location_info('', self.country, None, -106.0, 32.0)
+        self.assertEqual(country, self.country)
+        self.assertIsNone(region)
+        self.assertIsNone(city)

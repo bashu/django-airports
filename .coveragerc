@@ -1,11 +1,14 @@
 [run]
-branch = true
+omit = */migrations/*,*__init__*
+source = airports
 
 [report]
-omit =
-    *site-packages*
-    *tests*
-    *.tox*
-show_missing = True
 exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
     raise NotImplementedError
+    if __name__ == .__main__.:
+    # -*- coding: utf-8 -*-
+    pass
+    [run]
