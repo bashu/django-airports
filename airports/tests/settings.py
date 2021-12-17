@@ -9,7 +9,7 @@ INTERNAL_IPS = []
 
 # Application definition
 
-PROJECT_APPS = ["tests", "airports"]
+PROJECT_APPS = ["airports.tests", "airports"]
 
 INSTALLED_APPS = [
     "django.contrib.auth",
