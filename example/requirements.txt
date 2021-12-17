@@ -1,6 +1,5 @@
-django<2.0
-psycopg2>=2.8,<2.9
-dj-database-url
-requests
+Django>3.2,<3.3
 # Additional requirements go here
 django-cities>=0.5
+requests
+tox

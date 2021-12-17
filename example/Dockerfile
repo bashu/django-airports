@@ -10,8 +10,8 @@ FROM python as python-build-stage
 RUN apt-get update && apt-get install --no-install-recommends -y \
   # dependencies for building Python packages
   build-essential \
-  # psycopg2 dependencies
-  libpq-dev \
+  # other dependencies
+  libsqlite3-mod-spatialite binutils libproj-dev libgdal-dev gdal-bin \
   # pillow dependencies
   libjpeg-dev zlib1g-dev
 
@@ -22,6 +22,8 @@ COPY ./requirements.txt /requirements.txt
 RUN pip wheel --wheel-dir /usr/src/app/wheels  \
   -r /requirements.txt
 
+RUN pip install GDAL==$(gdal-config --version) --global-option=build_ext --global-option="-I/usr/include/gdal"
+
 # Python 'run' stage
 FROM python as python-run-stage
 
@@ -29,7 +31,7 @@ ARG APP_HOME=/app
 
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
-ENV DJANGO_SETTINGS_MODULE=example.settings
+ENV DJANGO_SETTINGS_MODULE=localsite.settings
 
 WORKDIR ${APP_HOME}
 
@@ -38,12 +40,10 @@ RUN addgroup --system django \
 
 # Install required system dependencies
 RUN apt-get update && apt-get install --no-install-recommends -y \
-  # psycopg2 dependencies
-  libpq-dev \
   # translations dependencies
   gettext \
   # other dependencies
-  binutils libproj-dev gdal-bin \
+  libsqlite3-mod-spatialite binutils gdal-bin \
   # cleaning up unused files
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/*
