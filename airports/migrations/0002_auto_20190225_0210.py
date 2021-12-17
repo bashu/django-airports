@@ -16,17 +16,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="airport",
             name="city_name",
-            field=models.CharField(blank=True, max_length=100, null=True, verbose_name="name"),
+            field=models.CharField(blank=True, max_length=100, null=True, verbose_name="city name"),
         ),
         migrations.AddField(
             model_name="airport",
             name="ident",
-            field=models.CharField(blank=True, max_length=12, null=True, verbose_name="Ident code"),
+            field=models.CharField(blank=True, max_length=12, null=True, verbose_name="ident code"),
         ),
         migrations.AddField(
             model_name="airport",
             name="local",
-            field=models.CharField(blank=True, max_length=12, null=True, verbose_name="Local code"),
+            field=models.CharField(blank=True, max_length=12, null=True, verbose_name="local code"),
         ),
         migrations.AddField(
             model_name="airport",

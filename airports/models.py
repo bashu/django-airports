@@ -7,12 +7,12 @@ from django.utils.translation import gettext_lazy as _
 
 class Airport(models.Model):
     name = models.CharField(_("name"), max_length=100)
-    city_name = models.CharField(_("name"), null=True, blank=True, max_length=100)
+    city_name = models.CharField(_("city name"), null=True, blank=True, max_length=100)
 
     iata = models.CharField(_("IATA/FAA code"), null=True, blank=True, max_length=3, validators=[MinLengthValidator(3)])
     icao = models.CharField(_("ICAO code"), null=True, blank=True, max_length=4, validators=[MinLengthValidator(4)])
-    local = models.CharField(_("Local code"), null=True, blank=True, max_length=12)
-    ident = models.CharField(_("Ident code"), null=True, blank=True, max_length=12)
+    local = models.CharField(_("local code"), null=True, blank=True, max_length=12)
+    ident = models.CharField(_("ident code"), null=True, blank=True, max_length=12)
 
     altitude = models.FloatField(_("altitude"), default=0)
     location = models.PointField(_("location"))
