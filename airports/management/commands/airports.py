@@ -67,7 +67,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         logger.info("Checking countries and cities")
         if City.objects.all().count() == 0 or Country.objects.all().count() == 0:
-            call_command("cities", "--import", "country,city")
+            call_command("cities", "--import", "country,city,alt_name")
 
         self.options = options
 
