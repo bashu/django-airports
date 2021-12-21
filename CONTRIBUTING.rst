@@ -77,7 +77,7 @@ Ready to contribute? Here's how to set up `django-airports` for local developmen
 5. When you're done making changes, check that your changes pass flake8 and the
    tests, including testing other Python versions with tox::
 
-        $ flake8 airports tests
+        $ flake8 airports
         $ python setup.py test
         $ tox
 
