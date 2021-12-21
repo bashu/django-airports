@@ -28,16 +28,16 @@ clean-pyc: ## remove Python file artifacts
 	find . -name '*~' -exec rm -f {} +
 
 lint: ## check style with flake8
-	flake8 airports tests
+	flake8 airports
 
 test: ## run tests quickly with the default Python
-	python runtests.py tests
+	python setup.py test
 
 test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source airports runtests.py tests
+	coverage run --source airports setup.py test
 	coverage report -m
 	coverage html
 	open htmlcov/index.html
@@ -51,8 +51,8 @@ docs: ## generate Sphinx HTML documentation, including API docs
 	$(BROWSER) docs/_build/html/index.html
 
 release: clean ## package and upload a release
-	python setup.py sdist upload
-	python setup.py bdist_wheel upload
+	python setup.py sdist bdist_wheel
+	twine upload 'dist/*' --verbose
 
 sdist: clean ## package
 	python setup.py sdist

@@ -18,11 +18,10 @@ Provides airports' related models and data (from `OurAirports <http://ourairport
 Authored by `Basil Shubin <https://github.com/bashu>`_,  and some great
 `contributors <https://github.com/bashu/django-airports/contributors>`_.
 
-.. raw:: html
-
-    <p align="center">
-        <img src="https://raw.githubusercontent.com/bashu/django-airports/develop/logo.png">
-    </p>
+.. image:: https://raw.githubusercontent.com/bashu/django-airports/develop/logo.png
+   :target: https://raw.githubusercontent.com/bashu/django-airports/develop/logo.png
+   :align: center
+   :width: 600px
 
 Installation
 ------------
