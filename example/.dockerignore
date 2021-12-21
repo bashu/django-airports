@@ -1,5 +1,0 @@
-# Don't copy the git repos or anything else that isn't needed into the docker image.
-# This greatly speeds up re-building the image.
-**/.git
-**/Dockerfile
-**/docker-compose.yml
