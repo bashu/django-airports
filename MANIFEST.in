@@ -3,3 +3,4 @@ include CHANGES.rst
 include README.rst
 include LICENSE
 recursive-exclude example *
+recursive-include airports/locale *.po *.mo
