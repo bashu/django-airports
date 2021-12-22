@@ -1,0 +1,87 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-12-22 15:38+0700\n"
+"PO-Revision-Date: 2021-12-22 15:42+0700\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
+"%100>=11 && n%100<=14)? 2 : 3);\n"
+"Last-Translator: Basil S. <basil.shubin@gmail.com>\n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.4.2\n"
+
+#: models.py:9
+msgid "name"
+msgstr "название"
+
+#: models.py:9
+msgid "The official airport name, including \"Airport\", \"Airstrip\", etc."
+msgstr ""
+
+#: models.py:10
+msgid "municipality"
+msgstr "муниципалитет"
+
+#: models.py:10
+msgid ""
+"The primary municipality that the airport serves (when available). Note that "
+"this is not necessarily the municipality where the airport is physically "
+"located."
+msgstr ""
+
+#: models.py:12
+msgid "IATA/FAA code"
+msgstr "код ИАТА"
+
+#: models.py:13
+msgid "ICAO code"
+msgstr "код ИКАО"
+
+#: models.py:14
+msgid "identifier"
+msgstr "идентификатор"
+
+#: models.py:14
+msgid "The text identifier used in the OurAirports URL"
+msgstr ""
+
+#: models.py:15
+msgid "local country code"
+msgstr "местный код аэропорта"
+
+#: models.py:15
+msgid "The local country code for the airport"
+msgstr ""
+
+#: models.py:16
+msgid "type"
+msgstr "тип"
+
+#: models.py:16
+msgid ""
+"The type of the airport. Allowed values are \"closed_airport\", \"heliport"
+"\", \"large_airport\", \"medium_airport\", \"seaplane_base\", and "
+"\"small_airport\"."
+msgstr ""
+
+#: models.py:18
+msgid "altitude"
+msgstr "высота"
+
+#: models.py:18
+msgid "The airport elevation MSL in feet (not metres)."
+msgstr ""
+
+#: models.py:19
+msgid "coordinates"
+msgstr "координаты"
