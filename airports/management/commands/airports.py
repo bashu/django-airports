@@ -163,14 +163,14 @@ class DataImporter:
             id = row["id"]
             longitude = float(row["longitude_deg"])
             latitude = float(row["latitude_deg"])
-            city_name = row["municipality"] or None
+            municipality = row["municipality"] or None
             row_country_code = row["iso_country"]
             country_code, region_code = regex_region.split(row["iso_region"].strip(), 1)
 
             name = row["name"].strip() or None
             type = row["type"].strip() or None
             ident = row["ident"].strip() or None
-            local = row["local_code"].strip() or None
+            local_code = row["local_code"].strip() or None
             iata = row["iata_code"].strip() or None
             icao = row["gps_code"].strip() or None
 
@@ -213,21 +213,21 @@ class DataImporter:
                         logger.debug("Bad region_code: {}".format(row["iso_region"]))
                         region = None
 
-                country, region, city = get_location_info(city_name, country, region, longitude, latitude)
+                country, region, city = get_location_info(municipality, country, region, longitude, latitude)
 
                 if city is None:
-                    logger.debug(f"Airport: {name}: Cannot find city: {city_name}.")
+                    logger.debug(f"Airport: {name}: Cannot find city: {municipality}.")
 
                 airport = create_airport(
                     id=id,
                     altitude=altitude,
                     city=city,
-                    city_name=city_name,
+                    municipality=municipality,
                     country=country,
                     iata=iata,
                     icao=icao,
                     ident=ident,
-                    local=local,
+                    local_code=local_code,
                     longitude=longitude,
                     latitude=latitude,
                     name=name,
@@ -242,13 +242,13 @@ def create_airport(
     altitude=None,
     name=None,
     city=None,
-    city_name=None,
+    municipality=None,
     region=None,
     country=None,
     iata=None,
     icao=None,
     ident=None,
-    local=None,
+    local_code=None,
     latitude=None,
     longitude=None,
 ):
@@ -261,11 +261,11 @@ def create_airport(
     :param longitude:
     :param latitude:
     :param name:
-    :param city_name:
+    :param municipality:
     :param iata:
     :param icao:
     :param ident:
-    :param local:
+    :param local_code:
     :param altitude:
     :param city:
     :param region:
@@ -275,7 +275,7 @@ def create_airport(
 
     location = Point(longitude, latitude, srid=4326)
 
-    name = name or city_name or getattr(city, "name", "UNKNOWN")
+    name = name or municipality or getattr(city, "name", "UNKNOWN")
 
     try:
         # Convert altitude to meters
@@ -286,12 +286,12 @@ def create_airport(
     defaults = dict(
         altitude=altitude,
         city=city,
-        city_name=city_name,
+        municipality=municipality,
         country=country,
         iata=iata,
         icao=icao,
         ident=ident,
-        local=local,
+        local_code=local_code,
         location=location,
         name=name,
         region=region,

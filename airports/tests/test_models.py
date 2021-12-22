@@ -47,10 +47,10 @@ class AirportTests(TestCase):
         self.id = 8227
         self.airport_defaults = dict(
             name="On the Rocks Airport",
-            city_name="Alpine",
+            municipality="Alpine",
             iata=None,
             icao="1CA6",
-            local="1CA6",
+            local_code="1CA6",
             ident="1CA6",
             altitude=0.0,
             longitude=-116.7229995727539,
@@ -80,14 +80,14 @@ class AirportTests(TestCase):
         self.assertIsNotNone(airport)
         self.assertEqual(airport.name, "Alpine")
 
-    def test_create_airport_no_city_name(self):
+    def test_create_airport_no_municipality(self):
         country, region, city = get_location_info("", None, None, -116.7229995727539, 32.76509857177734)
         self.assertIsNotNone(country)
         self.assertIsNotNone(region)
         self.assertIsNotNone(city)
         defaults = self.airport_defaults
         defaults["name"] = ""
-        defaults["city_name"] = ""
+        defaults["municipality"] = ""
         airport = create_airport(id=self.id, **defaults)
         self.assertIsNotNone(airport)
         self.assertEqual(airport.name, "Alpine")

@@ -48,10 +48,10 @@ class ManagementCommandTests(TestCase):
         self.airport = Airport(
             id=8227,
             name="On the Rocks Airport",
-            city_name="Alpine",
+            municipality="Alpine",
             iata=None,
             icao="1CA6",
-            local="1CA6",
+            local_code="1CA6",
             ident="1CA6",
             altitude=0.0,
             location=Point(-116.7229995727539, 32.76509857177734),
