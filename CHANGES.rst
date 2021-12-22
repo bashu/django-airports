@@ -4,7 +4,7 @@ Changes
 1.0.2 (2021-12-22)
 ~~~~~~~~~~~~~~~~~~
 
-* Include missing *.mo files.
+* Include missing .mo files.
 
 1.0.1 (2021-12-22)
 ~~~~~~~~~~~~~~~~~~
