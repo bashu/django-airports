@@ -1,6 +1,12 @@
 Changes
 -------
 
+1.0.1 (2021-12-22)
+~~~~~~~~~~~~~~~~~~
+
+* Added ru translation.
+* Renamed city_name field to municipality, local field to local_code.
+
 1.0.0 (2021-12-21)
 ~~~~~~~~~~~~~~~~~~
 
